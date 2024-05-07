@@ -23,7 +23,7 @@ class NodeNavigationDelagate(QtWidgets.QStyledItemDelegate):
             option.rect.x() + margin[0],
             option.rect.y() + margin[1],
             option.rect.width() - (margin[0] * 2),
-            option.rect.height() - (margin[1] * 2)
+            option.rect.height() - (margin[1] * 2),
         )
 
         painter.save()
@@ -60,8 +60,7 @@ class NodeNavigationDelagate(QtWidgets.QStyledItemDelegate):
             x = rect.left() + 4.0
             size = 10.0
             for clr in [QtGui.QColor(0, 0, 0, 80), itm_color]:
-                itm_rect = QtCore.QRectF(
-                    x, rect.center().y() - (size / 2), size, size)
+                itm_rect = QtCore.QRectF(x, rect.center().y() - (size / 2), size, size)
                 painter.setBrush(clr)
                 painter.drawRoundedRect(itm_rect, 2.0, 2.0)
                 size -= 5.0
@@ -69,17 +68,17 @@ class NodeNavigationDelagate(QtWidgets.QStyledItemDelegate):
 
         # text
         # pen_color = option.palette.text().color()
-        pen_color = QtGui.QColor(*tuple(map(
-            lambda i, j: i - j, (255, 255, 255), bg_color.getRgb()
-        )))
+        pen_color = QtGui.QColor(
+            *tuple(map(lambda i, j: i - j, (255, 255, 255), bg_color.getRgb()))
+        )
         pen = QtGui.QPen(pen_color, 0.5)
         pen.setCapStyle(QtCore.Qt.RoundCap)
         painter.setPen(pen)
 
         font = painter.font()
         font_metrics = QtGui.QFontMetrics(font)
-        item_text = item.text().replace(' ', '_')
-        if hasattr(font_metrics, 'horizontalAdvance'):
+        item_text = item.text().replace(" ", "_")
+        if hasattr(font_metrics, "horizontalAdvance"):
             font_width = font_metrics.horizontalAdvance(item_text)
         else:
             font_width = font_metrics.width(item_text)
@@ -87,7 +86,8 @@ class NodeNavigationDelagate(QtWidgets.QStyledItemDelegate):
         text_rect = QtCore.QRectF(
             rect.center().x() - (font_width / 2) + txt_offset,
             rect.center().y() - (font_height / 2),
-            font_width, font_height
+            font_width,
+            font_height,
         )
         painter.drawText(text_rect, item.text())
         painter.restore()
@@ -99,10 +99,10 @@ class NodeNavigationWidget(QtWidgets.QListView):
 
     def __init__(self, parent=None):
         super(NodeNavigationWidget, self).__init__(parent)
-        self.setSelectionMode(self.SingleSelection)
-        self.setResizeMode(self.Adjust)
-        self.setViewMode(self.ListMode)
-        self.setFlow(self.LeftToRight)
+        self.setSelectionMode(self.SelectionMode.SingleSelection)
+        self.setResizeMode(self.ResizeMode.Adjust)
+        self.setViewMode(self.ViewMode.ListMode)
+        self.setFlow(self.Flow.LeftToRight)
         self.setDragEnabled(False)
         self.setMinimumHeight(20)
         self.setMaximumHeight(36)
@@ -110,8 +110,9 @@ class NodeNavigationWidget(QtWidgets.QListView):
 
         # self.viewport().setAutoFillBackground(False)
         self.setStyleSheet(
-            'QListView {{border: 0px;background-color: rgb({0},{1},{2});}}'
-            .format(*ViewerNavEnum.BACKGROUND_COLOR.value)
+            "QListView {{border: 0px;background-color: rgb({0},{1},{2});}}".format(
+                *ViewerNavEnum.BACKGROUND_COLOR.value
+            )
         )
 
         self.setItemDelegate(NodeNavigationDelagate(self))
@@ -144,7 +145,7 @@ class NodeNavigationWidget(QtWidgets.QListView):
         item = QtGui.QStandardItem(label)
         item.setToolTip(node_id)
         metrics = QtGui.QFontMetrics(item.font())
-        if hasattr(metrics, 'horizontalAdvance'):
+        if hasattr(metrics, "horizontalAdvance"):
             width = metrics.horizontalAdvance(item.text())
         else:
             width = metrics.width(item.text())
@@ -152,8 +153,8 @@ class NodeNavigationWidget(QtWidgets.QListView):
         item.setSizeHint(QtCore.QSize(width, 20))
         self.model().appendRow(item)
         self.selectionModel().setCurrentIndex(
-            self.model().indexFromItem(item),
-            QtCore.QItemSelectionModel.ClearAndSelect)
+            self.model().indexFromItem(item), QtCore.QItemSelectionModel.ClearAndSelect
+        )
 
     def update_label_item(self, label, node_id):
         rows = reversed(range(self.model().rowCount()))
@@ -175,7 +176,7 @@ class NodeNavigationWidget(QtWidgets.QListView):
         [self.model().removeRow(r) for r in rows]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
 
     def on_nav_changed(selected_id, remove_ids):
@@ -186,12 +187,9 @@ if __name__ == '__main__':
     widget = NodeNavigationWidget()
     widget.navigation_changed.connect(on_nav_changed)
 
-    widget.add_label_item('Close Graph', 'root')
+    widget.add_label_item("Close Graph", "root")
     for i in range(1, 5):
-        widget.add_label_item(
-            'group node {}'.format(i),
-            'node_id{}'.format(i)
-        )
+        widget.add_label_item("group node {}".format(i), "node_id{}".format(i))
     widget.resize(600, 30)
     widget.show()
 
