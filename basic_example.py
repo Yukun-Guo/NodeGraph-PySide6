@@ -122,7 +122,6 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
             e.source() == self.nodesTree
             and e.source().selectedIndexes()[0].parent().data() is None
         ):
-            print("refuse")
             e.ignore()
         else:
             e.accept()
