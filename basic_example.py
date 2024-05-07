@@ -165,15 +165,20 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         self.nodefilter = QtWidgets.QLineEdit(textChanged=self.onFilterChanged)
         self.nodefilter.setPlaceholderText("Filter nodes...")
         refreshButton = QtWidgets.QPushButton("Refresh")
+        refreshButton.setStyleSheet(
+            "border-radius: 3px; border: 1px; padding: 0px; margin: 0px;"
+        )
         refreshButton.clicked.connect(self.updateNodeExplorer)
-        filterandrefresh = QtWidgets.QHBoxLayout(
+        filterAndRefresh = QtWidgets.QHBoxLayout(
             nodeWidget, spacing=0, contentsMargins=QtCore.QMargins(0, 0, 0, 0)
         )
-        filterandrefresh.setContentsMargins(0, 0, 0, 0)
-        filterandrefresh.addWidget(self.nodefilter)
-        filterandrefresh.addWidget(refreshButton)
-        nodeWidgetLayout.addLayout(filterandrefresh)
+        filterAndRefresh.addWidget(self.nodefilter)
+        filterAndRefresh.addWidget(refreshButton)
+        nodeWidgetLayout.addLayout(filterAndRefresh)
         createNewNodeButton = QtWidgets.QPushButton("Create New Node")
+        createNewNodeButton.setStyleSheet(
+            "border-radius: 3px; border: 1px; padding: 0px; margin: 0px;"
+        )
 
         createNewNodeButton.clicked.connect(self.onCreateNode)
         nodeWidgetLayout.addWidget(createNewNodeButton)
@@ -211,7 +216,6 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
                 if nodeClass[1].__identifier__ == identifier:
                     child = QtWidgets.QTreeWidgetItem()
                     child.setText(0, nodeClass[0])
-                    child.setText(1, nodeClass[1].__identifier__ + "." + nodeClass[0])
                     item.addChild(child)
         self.nodesTree.expandAll()
 
