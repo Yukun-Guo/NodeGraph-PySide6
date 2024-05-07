@@ -63,12 +63,16 @@ class NodeViewer(QtWidgets.QGraphicsView):
         super(NodeViewer, self).__init__(parent)
 
         self.setScene(NodeScene(self))
-        self.setRenderHint(QtGui.QPainter.Antialiasing, True)
-        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.setViewportUpdateMode(QtWidgets.QGraphicsView.FullViewportUpdate)
-        self.setCacheMode(QtWidgets.QGraphicsView.CacheBackground)
-        self.setOptimizationFlag(QtWidgets.QGraphicsView.DontAdjustForAntialiasing)
+        self.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing, True)
+        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setViewportUpdateMode(
+            QtWidgets.QGraphicsView.ViewportUpdateMode.FullViewportUpdate
+        )
+        self.setCacheMode(QtWidgets.QGraphicsView.CacheModeFlag.CacheBackground)
+        self.setOptimizationFlag(
+            QtWidgets.QGraphicsView.OptimizationFlag.DontAdjustForAntialiasing
+        )
 
         self.setAcceptDrops(True)
         self.resize(850, 800)

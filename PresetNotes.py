@@ -2,6 +2,15 @@ import NodeGraphQt
 from PySide6 import QtCore, QtGui
 
 
+class BasicImageNode(NodeGraphQt.NodeImage):
+    __identifier__ = "nodes.image"
+    NODE_NAME = "image node"
+
+    def __init__(self):
+        super(BasicImageNode, self).__init__()
+        self.add_input("in")
+
+
 class BasicNodeA(NodeGraphQt.BaseNode):
     """
     A node class with 2 inputs and 2 outputs.

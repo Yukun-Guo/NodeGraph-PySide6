@@ -18,45 +18,46 @@ class _NodeGroupBox(QtWidgets.QGroupBox):
         self.layout().setContentsMargins(*margin)
         super(_NodeGroupBox, self).setTitle(text)
 
-    def setTitleAlign(self, align='center'):
-        text_color = tuple(map(lambda i, j: i - j, (255, 255, 255),
-                               ViewerEnum.BACKGROUND_COLOR.value))
+    def setTitleAlign(self, align="center"):
+        text_color = tuple(
+            map(lambda i, j: i - j, (255, 255, 255), ViewerEnum.BACKGROUND_COLOR.value)
+        )
         style_dict = {
-            'QGroupBox': {
-                'background-color': 'rgba(0, 0, 0, 0)',
-                'border': '0px solid rgba(0, 0, 0, 0)',
-                'margin-top': '1px',
-                'padding-bottom': '2px',
-                'padding-left': '1px',
-                'padding-right': '1px',
-                'font-size': '8pt',
+            "QGroupBox": {
+                "background-color": "rgba(0, 0, 0, 0)",
+                "border": "0px solid rgba(0, 0, 0, 0)",
+                "margin-top": "1px",
+                "padding-bottom": "2px",
+                "padding-left": "1px",
+                "padding-right": "1px",
+                "font-size": "8pt",
             },
-            'QGroupBox::title': {
-                'subcontrol-origin': 'margin',
-                'subcontrol-position': 'top center',
-                'color': 'rgba({0}, {1}, {2}, 100)'.format(*text_color),
-                'padding': '0px',
-            }
+            "QGroupBox::title": {
+                "subcontrol-origin": "margin",
+                "subcontrol-position": "top center",
+                "color": "rgba({0}, {1}, {2}, 100)".format(*text_color),
+                "padding": "0px",
+            },
         }
         if self.title():
-            style_dict['QGroupBox']['padding-top'] = '14px'
+            style_dict["QGroupBox"]["padding-top"] = "14px"
         else:
-            style_dict['QGroupBox']['padding-top'] = '2px'
+            style_dict["QGroupBox"]["padding-top"] = "2px"
 
-        if align == 'center':
-            style_dict['QGroupBox::title']['subcontrol-position'] = 'top center'
-        elif align == 'left':
-            style_dict['QGroupBox::title']['subcontrol-position'] += 'top left'
-            style_dict['QGroupBox::title']['margin-left'] = '4px'
-        elif align == 'right':
-            style_dict['QGroupBox::title']['subcontrol-position'] += 'top right'
-            style_dict['QGroupBox::title']['margin-right'] = '4px'
-        stylesheet = ''
+        if align == "center":
+            style_dict["QGroupBox::title"]["subcontrol-position"] = "top center"
+        elif align == "left":
+            style_dict["QGroupBox::title"]["subcontrol-position"] += "top left"
+            style_dict["QGroupBox::title"]["margin-left"] = "4px"
+        elif align == "right":
+            style_dict["QGroupBox::title"]["subcontrol-position"] += "top right"
+            style_dict["QGroupBox::title"]["margin-right"] = "4px"
+        stylesheet = ""
         for css_class, css in style_dict.items():
-            style = '{} {{\n'.format(css_class)
+            style = "{} {{\n".format(css_class)
             for elm_name, elm_val in css.items():
-                style += '  {}:{};\n'.format(elm_name, elm_val)
-            style += '}\n'
+                style += "  {}:{};\n".format(elm_name, elm_val)
+            style += "}\n"
             stylesheet += style
         self.setStyleSheet(stylesheet)
 
@@ -92,7 +93,7 @@ class NodeBaseWidget(QtWidgets.QGraphicsProxyWidget):
     :emits: property name, propety value
     """
 
-    def __init__(self, parent=None, name=None, label=''):
+    def __init__(self, parent=None, name=None, label=""):
         super(NodeBaseWidget, self).__init__(parent)
         self.setZValue(Z_VAL_NODE_WIDGET)
         self._name = name
@@ -100,8 +101,8 @@ class NodeBaseWidget(QtWidgets.QGraphicsProxyWidget):
         self._node = None
 
     def setToolTip(self, tooltip):
-        tooltip = tooltip.replace('\n', '<br/>')
-        tooltip = '<b>{}</b><br/>{}'.format(self.get_name(), tooltip)
+        tooltip = tooltip.replace("\n", "<br/>")
+        tooltip = "<b>{}</b><br/>{}".format(self.get_name(), tooltip)
         super(NodeBaseWidget, self).setToolTip(tooltip)
 
     def on_value_changed(self, *args, **kwargs):
@@ -174,7 +175,7 @@ class NodeBaseWidget(QtWidgets.QGraphicsProxyWidget):
             return
         if self.node:
             raise NodeWidgetError(
-                'Can\'t set property name widget already added to a Node'
+                "Can't set property name widget already added to a Node"
             )
         self._name = name
 
@@ -218,7 +219,7 @@ class NodeBaseWidget(QtWidgets.QGraphicsProxyWidget):
             widget (QtWidgets.QWidget): custom.
         """
         if self.widget():
-            raise NodeWidgetError('Custom node widget already set.')
+            raise NodeWidgetError("Custom node widget already set.")
         group = _NodeGroupBox(self._label)
         group.add_node_widget(widget)
         self.setWidget(group)
@@ -232,7 +233,7 @@ class NodeBaseWidget(QtWidgets.QGraphicsProxyWidget):
         """
         return self._label
 
-    def set_label(self, label=''):
+    def set_label(self, label=""):
         """
         Sets the label text above the embedded widget.
 
@@ -256,7 +257,7 @@ class NodeComboBox(NodeBaseWidget):
         :meth:`NodeGraphQt.BaseNode.add_combo_menu`
     """
 
-    def __init__(self, parent=None, name='', label='', items=None):
+    def __init__(self, parent=None, name="", label="", items=None):
         super(NodeComboBox, self).__init__(parent, name, label)
         self.setZValue(Z_VAL_NODE_WIDGET + 1)
         combo = QtWidgets.QComboBox()
@@ -268,7 +269,7 @@ class NodeComboBox(NodeBaseWidget):
 
     @property
     def type_(self):
-        return 'ComboNodeWidget'
+        return "ComboNodeWidget"
 
     def get_value(self):
         """
@@ -280,7 +281,7 @@ class NodeComboBox(NodeBaseWidget):
         combo_widget = self.get_custom_widget()
         return str(combo_widget.currentText())
 
-    def set_value(self, text=''):
+    def set_value(self, text=""):
         combo_widget = self.get_custom_widget()
         if type(text) is list:
             combo_widget.clear()
@@ -326,35 +327,36 @@ class NodeLineEdit(NodeBaseWidget):
         :meth:`NodeGraphQt.BaseNode.add_text_input`
     """
 
-    def __init__(self, parent=None, name='', label='', text='', placeholder_text=''):
+    def __init__(self, parent=None, name="", label="", text="", placeholder_text=""):
         super(NodeLineEdit, self).__init__(parent, name, label)
         bg_color = ViewerEnum.BACKGROUND_COLOR.value
-        text_color = tuple(map(lambda i, j: i - j, (255, 255, 255),
-                               bg_color))
+        text_color = tuple(map(lambda i, j: i - j, (255, 255, 255), bg_color))
         text_sel_color = text_color
         style_dict = {
-            'QLineEdit': {
-                'background': 'rgba({0},{1},{2},20)'.format(*bg_color),
-                'border': '1px solid rgb({0},{1},{2})'
-                          .format(*ViewerEnum.GRID_COLOR.value),
-                'border-radius': '3px',
-                'color': 'rgba({0},{1},{2},150)'.format(*text_color),
-                'selection-background-color': 'rgba({0},{1},{2},100)'
-                                              .format(*text_sel_color),
+            "QLineEdit": {
+                "background": "rgba({0},{1},{2},20)".format(*bg_color),
+                "border": "1px solid rgb({0},{1},{2})".format(
+                    *ViewerEnum.GRID_COLOR.value
+                ),
+                "border-radius": "3px",
+                "color": "rgba({0},{1},{2},150)".format(*text_color),
+                "selection-background-color": "rgba({0},{1},{2},100)".format(
+                    *text_sel_color
+                ),
             }
         }
-        stylesheet = ''
+        stylesheet = ""
         for css_class, css in style_dict.items():
-            style = '{} {{\n'.format(css_class)
+            style = "{} {{\n".format(css_class)
             for elm_name, elm_val in css.items():
-                style += '  {}:{};\n'.format(elm_name, elm_val)
-            style += '}\n'
+                style += "  {}:{};\n".format(elm_name, elm_val)
+            style += "}\n"
             stylesheet += style
         ledit = QtWidgets.QLineEdit()
         ledit.setText(text)
         ledit.setPlaceholderText(placeholder_text)
         ledit.setStyleSheet(stylesheet)
-        ledit.setAlignment(QtCore.Qt.AlignCenter)
+        ledit.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         ledit.editingFinished.connect(self.on_value_changed)
         ledit.clearFocus()
         self.set_custom_widget(ledit)
@@ -362,7 +364,7 @@ class NodeLineEdit(NodeBaseWidget):
 
     @property
     def type_(self):
-        return 'LineEditNodeWidget'
+        return "LineEditNodeWidget"
 
     def get_value(self):
         """
@@ -373,7 +375,7 @@ class NodeLineEdit(NodeBaseWidget):
         """
         return str(self.get_custom_widget().text())
 
-    def set_value(self, text=''):
+    def set_value(self, text=""):
         """
         Sets the widgets current text.
 
@@ -397,22 +399,23 @@ class NodeCheckBox(NodeBaseWidget):
         :meth:`NodeGraphQt.BaseNode.add_checkbox`
     """
 
-    def __init__(self, parent=None, name='', label='', text='', state=False):
+    def __init__(self, parent=None, name="", label="", text="", state=False):
         super(NodeCheckBox, self).__init__(parent, name, label)
         _cbox = QtWidgets.QCheckBox(text)
-        text_color = tuple(map(lambda i, j: i - j, (255, 255, 255),
-                               ViewerEnum.BACKGROUND_COLOR.value))
+        text_color = tuple(
+            map(lambda i, j: i - j, (255, 255, 255), ViewerEnum.BACKGROUND_COLOR.value)
+        )
         style_dict = {
-            'QCheckBox': {
-                'color': 'rgba({0},{1},{2},150)'.format(*text_color),
+            "QCheckBox": {
+                "color": "rgba({0},{1},{2},150)".format(*text_color),
             }
         }
-        stylesheet = ''
+        stylesheet = ""
         for css_class, css in style_dict.items():
-            style = '{} {{\n'.format(css_class)
+            style = "{} {{\n".format(css_class)
             for elm_name, elm_val in css.items():
-                style += '  {}:{};\n'.format(elm_name, elm_val)
-            style += '}\n'
+                style += "  {}:{};\n".format(elm_name, elm_val)
+            style += "}\n"
             stylesheet += style
         _cbox.setStyleSheet(stylesheet)
         _cbox.setChecked(state)
@@ -426,7 +429,7 @@ class NodeCheckBox(NodeBaseWidget):
 
     @property
     def type_(self):
-        return 'CheckboxNodeWidget'
+        return "CheckboxNodeWidget"
 
     def get_value(self):
         """
@@ -446,3 +449,49 @@ class NodeCheckBox(NodeBaseWidget):
         """
         if state != self.get_value():
             self.get_custom_widget().setChecked(state)
+
+
+class NodeImageShow(NodeBaseWidget):
+    """
+    Displays as a ``QLabel`` in a node.
+
+    .. inheritance-diagram:: NodeGraphQt.widgets.node_widgets.NodeImageShow
+        :parts: 1
+
+    .. note::
+        `To embed a` ``QLabel`` `in a node see func:`
+        :meth:`NodeGraphQt.BaseNode.add_image`
+    """
+
+    def __init__(self, parent=None, name="", label="", image=None):
+        super(NodeImageShow, self).__init__(parent, name, label)
+        self.setZValue(Z_VAL_NODE_WIDGET + 1)
+        label = QtWidgets.QLabel()
+        label.setPixmap(image)
+        label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        label.setScaledContents(True)
+        self.set_custom_widget(label)
+        self.widget().setMaximumWidth(140)
+        self.widget().setMaximumHeight(140)
+
+    @property
+    def type_(self):
+        return "ImageNodeWidget"
+
+    def get_value(self):
+        """
+        Returns the current image.
+
+        Returns:
+            QPixmap: current image.
+        """
+        return self.get_custom_widget().pixmap()
+
+    def set_value(self, image=None):
+        """
+        Sets the current image.
+
+        Args:
+            image (QPixmap): new image.
+        """
+        self.get_custom_widget().setPixmap(image)
