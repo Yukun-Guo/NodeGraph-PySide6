@@ -6,6 +6,7 @@ import types
 from PySide6 import QtCore, QtWidgets, QtGui
 
 from NodeGraphQt import (
+    BaseNode,
     NodeGraph,
     PropertiesBinWidget,
     NodesTreeWidget,
@@ -91,7 +92,7 @@ def createCustomNode(
     # dynamically define a node class based on BaseNode.
     DynamicNode = type(
         nodeName,
-        (basic_nodes.BaseNode,),
+        (BaseNode,),
         {
             "__identifier__": "nodes.custom.",
             "NODE_NAME": nodeName,

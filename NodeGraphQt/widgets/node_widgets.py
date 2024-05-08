@@ -471,8 +471,8 @@ class NodeImageShow(NodeBaseWidget):
         label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         label.setScaledContents(True)
         self.set_custom_widget(label)
-        self.widget().setMaximumWidth(140)
-        self.widget().setMaximumHeight(140)
+        self.widget().setMinimumWidth(140)
+        self.widget().setMinimumHeight(140)
 
     @property
     def type_(self):

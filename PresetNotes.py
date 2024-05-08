@@ -2,13 +2,13 @@ import NodeGraphQt
 from PySide6 import QtCore, QtGui
 
 
-class BasicImageNode(NodeGraphQt.NodeImage):
+class BasicImageNode(NodeGraphQt.BaseNode):
     __identifier__ = "nodes.image"
     NODE_NAME = "image node"
 
     def __init__(self):
         super(BasicImageNode, self).__init__()
-        self.add_input("in")
+        self.add_image_show("image", "", QtGui.QPixmap("star.png"))
 
 
 class BasicNodeA(NodeGraphQt.BaseNode):
