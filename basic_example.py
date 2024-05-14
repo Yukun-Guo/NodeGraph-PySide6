@@ -165,21 +165,24 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         )
         self.nodefilter = QtWidgets.QLineEdit(textChanged=self.onFilterChanged)
         self.nodefilter.setPlaceholderText("Filter nodes...")
-        refreshButton = QtWidgets.QPushButton("Refresh")
-        refreshButton.setStyleSheet(
-            "border-radius: 3px; border: 1px; padding: 0px; margin: 0px;"
-        )
+        refreshButton = QtWidgets.QPushButton(text="", icon=QtGui.QIcon("icon/refresh.png"))
+
+        
+        # refreshButton.setStyleSheet(
+        #     "border-radius: 3px; border: 1px; padding: 0px; margin: 0px; background-color: #3d2d2d;"
+        # )
         refreshButton.clicked.connect(self.updateNodeExplorer)
-        filterAndRefresh = QtWidgets.QHBoxLayout(
-            nodeWidget, spacing=0, contentsMargins=QtCore.QMargins(0, 0, 0, 0)
+        filterAndRefreshWidget = QtWidgets.QWidget()
+        filterAndRefreshLayout = QtWidgets.QHBoxLayout(
+            filterAndRefreshWidget, spacing=0, contentsMargins=QtCore.QMargins(0, 0, 0, 0),
         )
-        filterAndRefresh.addWidget(self.nodefilter)
-        filterAndRefresh.addWidget(refreshButton)
-        nodeWidgetLayout.addLayout(filterAndRefresh)
+        filterAndRefreshLayout.addWidget(self.nodefilter)
+        filterAndRefreshLayout.addWidget(refreshButton)
+        nodeWidgetLayout.addWidget(filterAndRefreshWidget)
         createNewNodeButton = QtWidgets.QPushButton("Create New Node")
-        createNewNodeButton.setStyleSheet(
-            "border-radius: 3px; border: 1px; padding: 0px; margin: 0px;"
-        )
+        # createNewNodeButton.setStyleSheet(
+        #     "border-radius: 3px; border: 1px; padding: 0px; margin: 0px;"
+        # )
 
         createNewNodeButton.clicked.connect(self.onCreateNode)
         nodeWidgetLayout.addWidget(createNewNodeButton)

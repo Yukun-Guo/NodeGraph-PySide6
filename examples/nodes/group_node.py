@@ -19,3 +19,4 @@ class MyGroupNode(GroupNode):
         # create input and output port.
         self.add_input('in')
         self.add_output('out')
+        self.add_output('out2')
