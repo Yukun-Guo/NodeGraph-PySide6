@@ -313,6 +313,8 @@ class NodePropEditorWidget(QtWidgets.QWidget):
         self.__node_id = node.id
         self.__tab_windows = {}
         self.__tab = QtWidgets.QTabWidget()
+        self.__tab2 = QtWidgets.QTabWidget()
+        self.__tab3 = QtWidgets.QTabWidget()
 
         close_btn = QtWidgets.QPushButton()
         close_btn.setIcon(QtGui.QIcon(
@@ -326,7 +328,7 @@ class NodePropEditorWidget(QtWidgets.QWidget):
 
         self.name_wgt = PropLineEdit()
         self.name_wgt.set_name('name')
-        self.name_wgt.setToolTip('name\nSet the node name.')
+        self.name_wgt.setToolTip('Name\nSet the node name.')
         self.name_wgt.set_value(node.name())
         self.name_wgt.value_changed.connect(self._on_property_changed)
 
@@ -341,13 +343,15 @@ class NodePropEditorWidget(QtWidgets.QWidget):
 
         name_layout = QtWidgets.QHBoxLayout()
         name_layout.setContentsMargins(0, 0, 0, 0)
-        name_layout.addWidget(QtWidgets.QLabel('name'))
+        name_layout.addWidget(QtWidgets.QLabel('Name:'))
         name_layout.addWidget(self.name_wgt)
         name_layout.addWidget(close_btn)
         layout = QtWidgets.QVBoxLayout(self)
         layout.setSpacing(4)
         layout.addLayout(name_layout)
         layout.addWidget(self.__tab)
+        layout.addWidget(self.__tab2)
+        layout.addWidget(self.__tab3)
         layout.addWidget(self.type_wgt)
 
         self._port_connections = self._read_node(node)
@@ -437,7 +441,7 @@ class NodePropEditorWidget(QtWidgets.QWidget):
                 widget.value_changed.connect(self._on_property_changed)
 
         # add "Node" tab properties. (default props)
-        self.add_tab('Node')
+        self.add_tab('Node', index=2)
         default_props = {
             'color': 'Node base color.',
             'text_color': 'Node text color.',
@@ -466,27 +470,27 @@ class NodePropEditorWidget(QtWidgets.QWidget):
         ports_container = None
         if node.inputs() or node.outputs():
             ports_container = _PortConnectionsContainer(self, node=node)
-            self.__tab.addTab(ports_container, 'Ports')
+            self.__tab3.addTab(ports_container, 'Ports')
 
         # hide/remove empty tabs with no property widgets.
-        tab_index = {
-            self.__tab.tabText(x): x for x in range(self.__tab.count())
-        }
-        current_idx = None
-        for tab_name, prop_window in self.__tab_windows.items():
-            prop_widgets = prop_window.get_all_widgets()
-            if not prop_widgets:
-                # I prefer to hide the tab but in older version of pyside this
-                # attribute doesn't exist we'll just remove.
-                if hasattr(self.__tab, 'setTabVisible'):
-                    self.__tab.setTabVisible(tab_index[tab_name], False)
-                else:
-                    self.__tab.removeTab(tab_index[tab_name])
-                continue
-            if current_idx is None:
-                current_idx = tab_index[tab_name]
+        # tab_index = {
+        #     self.__tab.tabText(x): x for x in range(self.__tab.count())
+        # }
+        # current_idx = None
+        # for tab_name, prop_window in self.__tab_windows.items():
+        #     prop_widgets = prop_window.get_all_widgets()
+        #     if not prop_widgets:
+        #         # I prefer to hide the tab but in older version of pyside this
+        #         # attribute doesn't exist we'll just remove.
+        #         if hasattr(self.__tab, 'setTabVisible'):
+        #             self.__tab.setTabVisible(tab_index[tab_name], False)
+        #         else:
+        #             self.__tab.removeTab(tab_index[tab_name])
+        #         continue
+        #     if current_idx is None:
+        #         current_idx = tab_index[tab_name]
 
-        self.__tab.setCurrentIndex(current_idx)
+        # self.__tab.setCurrentIndex(current_idx)
 
         return ports_container
 
@@ -514,7 +518,7 @@ class NodePropEditorWidget(QtWidgets.QWidget):
         window.add_widget(name, widget)
         widget.value_changed.connect(self._on_property_changed)
 
-    def add_tab(self, name):
+    def add_tab(self, name, index=None):
         """
         add a new tab.
 
@@ -527,7 +531,10 @@ class NodePropEditorWidget(QtWidgets.QWidget):
         if name in self.__tab_windows.keys():
             raise AssertionError('Tab name {} already taken!'.format(name))
         self.__tab_windows[name] = _PropertiesContainer(self)
-        self.__tab.addTab(self.__tab_windows[name], name)
+        if index is not None:
+            self.__tab2.addTab(self.__tab_windows[name], name)
+        else:
+            self.__tab.addTab(self.__tab_windows[name], name)
         return self.__tab_windows[name]
 
     def get_tab_widget(self):
@@ -624,7 +631,7 @@ class PropertiesBinWidget(QtWidgets.QWidget):
     #: Signal emitted (node_id, prop_name, prop_value)
     property_changed = QtCore.Signal(str, str, object)
 
-    def __init__(self, parent=None, node_graph=None):
+    def __init__(self, parent=None, node_graph=None,mode=None):
         super(PropertiesBinWidget, self).__init__(parent)
         self.setWindowTitle('Properties Bin')
         self._prop_list = _PropertiesList()
@@ -632,7 +639,7 @@ class PropertiesBinWidget(QtWidgets.QWidget):
         self._limit.setToolTip('Set display nodes limit.')
         self._limit.setMaximum(10)
         self._limit.setMinimum(0)
-        self._limit.setValue(2)
+        self._limit.setValue(1)
         self._limit.valueChanged.connect(self.__on_limit_changed)
         self.resize(450, 400)
 
@@ -664,10 +671,20 @@ class PropertiesBinWidget(QtWidgets.QWidget):
 
         # wire up node graph.
         node_graph.add_properties_bin(self)
-        node_graph.node_double_clicked.connect(self.add_node)
+        # node_graph.node_double_clicked.connect(self.add_node)
         node_graph.nodes_deleted.connect(self.__on_nodes_deleted)
         node_graph.property_changed.connect(self.__on_graph_property_changed)
 
+        if mode=='dock':
+            self._limit.setHidden(True)
+            self._btn_lock.setHidden(True)
+            btn_clr.setHidden(True)
+            node_graph.node_selected.connect(self.add_node)
+        else:
+            self._limit.setHidden(False)
+            self._btn_lock.setHidden(False)
+            btn_clr.setHidden(False)
+            node_graph.node_double_clicked.connect(self.add_node)
     def __repr__(self):
         return '<{} object at {}>'.format(
             self.__class__.__name__, hex(id(self))

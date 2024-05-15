@@ -111,11 +111,13 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         super(FlowNodeGraph, self).__init__()
         self.setAcceptDrops(True)
         self.initUI()
-        self.properties_bin = PropertiesBinWidget(node_graph=self.graph)
+        self.properties_bin = PropertiesBinWidget(node_graph=self.graph,mode='dock')
         self.properties_bin.setWindowFlags(QtCore.Qt.WindowType.Tool)
+        self.dockWidgetProperties.setWidget(self.properties_bin)
         self.setupInitalGraphy()
         self.updateNodeExplorer()
-        self.graph.node_double_clicked.connect(self.display_properties_bin)
+        # self.graph.node_double_clicked.connect(self.display_properties_bin)
+        # self.graph.node_selected.connect(self.display_properties_bin)
 
     def dragEnterEvent(self, e):
         # if the item being dragged is a node from the node explorer, and the item is top level, refuse the event.
