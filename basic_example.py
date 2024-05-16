@@ -31,8 +31,7 @@ def createCustomNode(
     code_str = "def __init__(self):\n\tsuper(" + nodeName + ", self).__init__()\n"
     for inputPort in inputPorts:
         code_str = (
-            code_str
-            + f"\tself.add_input(name='{inputPort['name']}',"
+            f"{code_str}\tself.add_input(name='{inputPort['name']}',"
             + f"multi_input={inputPort['multi_input']},"
             + f"display_name={inputPort['display_name']},"
             + f"color={inputPort['color']}, "
@@ -42,8 +41,7 @@ def createCustomNode(
 
     for outputPort in outputPorts:
         code_str = (
-            code_str
-            + f"\tself.add_output(name='{outputPort['name']}',"
+            f"{code_str}\tself.add_output(name='{outputPort['name']}',"
             + f"multi_output={outputPort['multi_output']},"
             + f"display_name={outputPort['display_name']},"
             + f"color={outputPort['color']}, "
@@ -54,8 +52,7 @@ def createCustomNode(
     for element in elementDict:
         if element["type"] == "text_input":
             code_str = (
-                code_str
-                + f"\tself.add_text_input(name='{element['name']}',"
+                f"{code_str}\tself.add_text_input(name='{element['name']}',"
                 + f"label='{element['label']}',"
                 + f"placeholder_text='{element['placeholder_text']}',"
                 + f"tooltip='{element['tooltip']}',"
@@ -64,8 +61,7 @@ def createCustomNode(
 
         elif element["type"] == "combo_menu":
             code_str = (
-                code_str
-                + f"\tself.add_combo_menu(name='{element['name']}',"
+                f"{code_str}\tself.add_combo_menu(name='{element['name']}',"
                 + f"label='{element['label']}',"
                 + f"items={element['items']},"
                 + f"tooltip='{element['tooltip']}',"
@@ -74,8 +70,7 @@ def createCustomNode(
 
         elif element["type"] == "checkbox":
             code_str = (
-                code_str
-                + f"\tself.add_checkbox(name='{element['name']}',"
+                f"{code_str}\tself.add_checkbox(name='{element['name']}',"
                 + f"label='{element['label']}',"
                 + f"text='{element['text']}',"
                 + f"state={element['state']},"
@@ -89,8 +84,7 @@ def createCustomNode(
     )
     func = types.FunctionType(create_code.co_consts[0], globals(), "func")
 
-    # dynamically define a node class based on BaseNode.
-    DynamicNode = type(
+    return type(
         nodeName,
         (BaseNode,),
         {
@@ -99,8 +93,6 @@ def createCustomNode(
             "__init__": func,
         },
     )
-
-    return DynamicNode
 
 
 class FlowNodeGraph(QtWidgets.QMainWindow):
@@ -138,15 +130,10 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         nodeId = sender.selectedIndexes()[0].data()
         gp = sender.selectedIndexes()[0].parent().data()
         p = position.x() - 20, position.y() - 20
-        self.graph.create_node(node_type=gp + "." + nodeId, pos=p)
+        self.graph.create_node(node_type=f"{gp}.{nodeId}", pos=p)
         e.accept()
 
     def initUI(self):
-        # add menubar
-        self.menubar = self.menuBar()
-        self.file_menu = self.menubar.addMenu("File")
-        self.file_menu.addAction("New Node").triggered.connect(self.onCreateNode)
-
         # add status bar
         self.statusBar().showMessage("Ready")
 
@@ -156,7 +143,8 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         self.graph._viewer.setAttribute(
             QtCore.Qt.WidgetAttribute.WA_AcceptTouchEvents, False
         )
-        self.graph.set_context_menu_from_file("./examples/hotkeys/hotkeys.json")
+        # set the context menu from a json file.
+        self.graph.set_context_menu_from_file("hotkeys.json")
         self.setCentralWidget(self.graph.widget)
 
         # create dock widgets Nodes Explorer.
@@ -169,10 +157,6 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         self.nodefilter.setPlaceholderText("Filter nodes...")
         refreshButton = QtWidgets.QPushButton(text="", icon=QtGui.QIcon("icon/refresh.png"))
 
-        
-        # refreshButton.setStyleSheet(
-        #     "border-radius: 3px; border: 1px; padding: 0px; margin: 0px; background-color: #3d2d2d;"
-        # )
         refreshButton.clicked.connect(self.updateNodeExplorer)
         filterAndRefreshWidget = QtWidgets.QWidget()
         filterAndRefreshLayout = QtWidgets.QHBoxLayout(
@@ -182,9 +166,6 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         filterAndRefreshLayout.addWidget(refreshButton)
         nodeWidgetLayout.addWidget(filterAndRefreshWidget)
         createNewNodeButton = QtWidgets.QPushButton("Create New Node")
-        # createNewNodeButton.setStyleSheet(
-        #     "border-radius: 3px; border: 1px; padding: 0px; margin: 0px;"
-        # )
 
         createNewNodeButton.clicked.connect(self.onCreateNode)
         nodeWidgetLayout.addWidget(createNewNodeButton)
@@ -207,9 +188,7 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         self.nodesTree.clear()
         self.nodefilter.clear()
         nodeClasses = inspect.getmembers(PresetNotes, inspect.isclass)
-        identifiers = []
-        for nodeClass in nodeClasses:
-            identifiers.append(nodeClass[1].__identifier__)
+        identifiers = [nodeClass[1].__identifier__ for nodeClass in nodeClasses]
         identifiers = list(set(identifiers))
 
         # add thoses identifiers to the tree as top level items, and add the classes name as children

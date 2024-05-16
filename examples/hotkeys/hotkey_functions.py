@@ -33,6 +33,8 @@ def layout_h_mode(graph):
     Set node graph layout direction to horizontal.
     """
     graph.set_layout_direction(0)
+    layout_graph_up(graph)
+    fit_to_selection(graph)
 
 
 def layout_v_mode(graph):
@@ -40,6 +42,8 @@ def layout_v_mode(graph):
     Set node graph layout direction to vertical.
     """
     graph.set_layout_direction(1)
+    layout_graph_down(graph)
+    fit_to_selection(graph)
 
 
 def open_session(graph):
@@ -69,7 +73,7 @@ def save_session(graph):
     current = graph.current_session()
     if current:
         graph.save_session(current)
-        msg = 'Session layout saved:\n{}'.format(current)
+        msg = f'Session layout saved:\n{current}'
         viewer = graph.viewer()
         viewer.message_dialog(msg, title='Session Saved')
     else:
