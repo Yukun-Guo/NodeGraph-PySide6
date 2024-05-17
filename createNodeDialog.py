@@ -134,7 +134,6 @@ class CreateNodeDialog(QtWidgets.QWidget):
     @QtCore.Slot()
     def addProperties(self):
         # add items in to  self.properties, and update the properties widget
-        # add name to self.properties['name']
         
         self.properties['name'].append(f'property_{len(self.properties["name"])}')
         self.properties['type'].append('lineEdit')
@@ -153,41 +152,6 @@ class CreateNodeDialog(QtWidgets.QWidget):
             
             self.property_table.setItem(i, 2, QtWidgets.QTableWidgetItem(self.properties['value'][i]))
         
-
-        # self.properties['name'].append(f'property_{num}')
-        # self.properties['type'].append(QtWidgets.QComboBox())
-        # self.properties['value'].append(QtWidgets.QLineEdit())
-        # self.property_table.setRowCount(len(self.properties['name']))
-        # # update the properties widget
-        # for i in range(len(self.properties['name'])):
-        #     name = self.properties['name'][i]
-        #     type = self.properties['type'][i]
-        #     value = self.properties['value'][i]
-        #     self.property_table.setCellWidget(i, 0, QtWidgets.QTableWidgetItem(name))
-        #     self.property_table.setCellWidget(i, 1, QtWidgets.QTableWidgetItem(type))
-        #     self.property_table.setCellWidget(i, 2, QtWidgets.QTableWidgetItem(value))
-        
-        
-        
-        
-        
-        
-        # # add a qlabel, dropdown menu, plainTextEdit, and a button to the properties tab, these four widgets will in a horizontal layout
-        # label = QtWidgets.QLabel("Name:")
-        # editorName = QtWidgets.QLineEdit()
-
-        # dropdown = QtWidgets.QComboBox()
-        # dropdown.addItems(["text_input", "combo_menu", "checkbox"])
-        # dropdown.currentIndexChanged.connect(self.updatePropertiesWidgetType)
-        # plainTextEdit = QtWidgets.QLineEdit()
-        # button = QtWidgets.QPushButton("Delete")
-        # hlayout = QtWidgets.QHBoxLayout()
-        # hlayout.addWidget(label)
-        # hlayout.addWidget(editorName)
-        # hlayout.addWidget(dropdown)
-        # hlayout.addWidget(plainTextEdit)
-        # hlayout.addWidget(button)
-        # self.widget_properties.layout().insertLayout(-1, hlayout)
         
     @QtCore.Slot() 
     def updatePropertiesWidgetType(self):
