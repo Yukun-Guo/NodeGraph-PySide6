@@ -8,59 +8,178 @@ from NodeGraphQt import (
     NodesTreeWidget,
     NodesPaletteWidget,
 )
+
+
 class CreateNodeDialog(QtWidgets.QWidget):
-    """a dialog for creating a new node.
-    
-    """
-    
+    """a dialog for creating a new node."""
+
     def __init__(self, parent=None):
         super(CreateNodeDialog, self).__init__()
         self.node_name = ""
-        self.inPorts = []
-        self.outPorts = []
-        self.properties = {'name':[], 'type':[], 'value':[]}
-        self.node= {}
-        self.propertyTypes = ['lineEdit', 'comboBox', 'checkBox']
+        self.inPorts = {
+            "display_name": [],
+            "name": [],
+        }
+        self.outPorts = {
+            "display_name": [],
+            "name": [],
+        }
+        self.properties = {"display_name": [], "name": [], "type": [], "value": []}
+        self.node = {
+            "color": [13, 18, 23],
+            "text_color": [255, 255, 255],
+            "border_color": [74, 84, 86],
+        }
+        self.propertyTypes = ["lineEdit", "comboBox", "checkBox"]
         self._setupUi()
+
     def _setupUi(self):
         self.setWindowTitle("Create Node")
         self.setWindowFlags(QtCore.Qt.WindowType.WindowStaysOnTopHint)
-        self.resize(500, 400)
+        self.resize(600, 600)
         self.layout = QtWidgets.QVBoxLayout(self)
-        
+
         self.name_wgt = QtWidgets.QLineEdit(self)
         self.tab_properties = QtWidgets.QTabWidget(self)
         self.tab_node = QtWidgets.QTabWidget(self)
-        self.tab_ports = QtWidgets.QTabWidget(self)
-        
+        self.tab_Ports = QtWidgets.QTabWidget(self)
+
         name_layout = QtWidgets.QHBoxLayout()
-        name_layout.addWidget(QtWidgets.QLabel('Name:'))
+        name_layout.addWidget(QtWidgets.QLabel("Name:"))
         name_layout.addWidget(self.name_wgt)
-    
+
         self.layout.setSpacing(4)
         self.layout.addLayout(name_layout)
+        self.layout.addWidget(self.tab_Ports)
         self.layout.addWidget(self.tab_properties)
         self.layout.addWidget(self.tab_node)
-        self.layout.addWidget(self.tab_ports)
 
+        # properties tab
         self.widget_properties = QtWidgets.QWidget(self)
         self.property_table = QtWidgets.QTableWidget(self)
-        self.property_table.setColumnCount(4)
-        self.property_table.setHorizontalHeaderLabels(['Name', 'Type', 'Value','operation'])
+        self.property_table.setColumnCount(5)
+        self.property_table.setHorizontalHeaderLabels(
+            ["Display name", "Name", "Type", "Value", " "]
+        )
         self.property_table.horizontalHeader().setStretchLastSection(True)
-        self.property_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Stretch)
-        
-        add_btn = QtWidgets.QPushButton('Add', self, clicked=self.addProperties)
-        
+        self.property_table.horizontalHeader().setSectionResizeMode(
+            QtWidgets.QHeaderView.ResizeMode.Stretch
+        )
+        add_btn = QtWidgets.QPushButton("Add", self, clicked=self.addProperties)
         # add button to widget properties
         layout = QtWidgets.QVBoxLayout(self.widget_properties)
         layout.addWidget(self.property_table)
         layout.addWidget(add_btn)
         layout.addStretch()
-        self.tab_properties.addTab(self.widget_properties, 'Properties')
-        
+        self.tab_properties.addTab(self.widget_properties, "Properties")
 
-    
+        # ports tab
+        self.widget_Ports = QtWidgets.QWidget(self)
+        layout = QtWidgets.QHBoxLayout(self.widget_Ports)
+
+        inPorts_layout = QtWidgets.QVBoxLayout()
+        inPorts_layout.addWidget(QtWidgets.QLabel("Input Ports"))
+        inPorts_table = QtWidgets.QTableWidget(self)
+        inPorts_table.setColumnCount(3)
+        inPorts_table.setHorizontalHeaderLabels(["Display Name", "Name", ""])
+        inPorts_table.horizontalHeader().setStretchLastSection(True)
+        inPorts_table.horizontalHeader().setSectionResizeMode(
+            QtWidgets.QHeaderView.ResizeMode.Stretch
+        )
+        inPorts_layout.addWidget(inPorts_table)
+        layout.addLayout(inPorts_layout)
+
+        outPorts_layout = QtWidgets.QVBoxLayout()
+        outPorts_layout.addWidget(QtWidgets.QLabel("Output Ports"))
+        outPorts_table = QtWidgets.QTableWidget(self)
+        outPorts_table.setColumnCount(3)
+        outPorts_table.setHorizontalHeaderLabels(["Display Name", "Name", ""])
+        outPorts_table.horizontalHeader().setStretchLastSection(True)
+        outPorts_table.horizontalHeader().setSectionResizeMode(
+            QtWidgets.QHeaderView.ResizeMode.Stretch
+        )
+        outPorts_layout.addWidget(outPorts_table)
+        layout.addLayout(outPorts_layout)
+
+        self.tab_Ports.addTab(self.widget_Ports, "Ports")
+
+        # node tab
+        self.widget_node = QtWidgets.QWidget(self)
+        layout = QtWidgets.QVBoxLayout(
+            self.widget_node, spacing=3, contentsMargins=QtCore.QMargins(0, 3, 3, 0)
+        )
+
+        color_layout = QtWidgets.QHBoxLayout()
+        color_label = QtWidgets.QLabel("Color:")
+        color_label.setFixedWidth(80)
+        color_layout.addWidget(color_label)
+        color_btn = QtWidgets.QPushButton("", self)
+        color_btn.setFixedSize(50, 30)
+        color_btn.setStyleSheet(
+            f"background-color: rgb({self.node['color'][0]}, {self.node['color'][1]}, {self.node['color'][2]})"
+        )
+        color_btn.clicked.connect(lambda: self.pickColor("node_color"))
+        color_layout.addWidget(color_btn)
+        node_color_r = QtWidgets.QLineEdit(self, text=f'{self.node["color"][0]}')
+        node_color_g = QtWidgets.QLineEdit(self, text=f'{self.node["color"][1]}')
+        node_color_b = QtWidgets.QLineEdit(self, text=f'{self.node["color"][2]}')
+        color_layout.addWidget(node_color_r)
+        color_layout.addWidget(node_color_g)
+        color_layout.addWidget(node_color_b)
+        layout.addLayout(color_layout)
+
+        text_color_layout = QtWidgets.QHBoxLayout()
+        text_color_label = QtWidgets.QLabel("Text Color:")
+        text_color_label.setFixedWidth(80)
+        text_color_layout.addWidget(text_color_label)
+        text_color_btn = QtWidgets.QPushButton("", self)
+        text_color_btn.setFixedSize(50, 30)
+        text_color_btn.setStyleSheet(
+            f"background-color: rgb({self.node['text_color'][0]}, {self.node['text_color'][1]}, {self.node['text_color'][2]})"
+        )
+        text_color_btn.clicked.connect(lambda: self.pickColor("text_color"))
+        text_color_layout.addWidget(text_color_btn)
+        text_node_color_r = QtWidgets.QLineEdit(
+            self, text=f'{self.node["text_color"][0]}'
+        )
+        text_node_color_g = QtWidgets.QLineEdit(
+            self, text=f'{self.node["text_color"][1]}'
+        )
+        text_node_color_b = QtWidgets.QLineEdit(
+            self, text=f'{self.node["text_color"][2]}'
+        )
+        text_color_layout.addWidget(text_node_color_r)
+        text_color_layout.addWidget(text_node_color_g)
+        text_color_layout.addWidget(text_node_color_b)
+        layout.addLayout(text_color_layout)
+
+        border_color_layout = QtWidgets.QHBoxLayout()
+        border_color_label = QtWidgets.QLabel("border Color:")
+        border_color_label.setFixedWidth(80)
+        border_color_layout.addWidget(border_color_label)
+        border_color_btn = QtWidgets.QPushButton("", self)
+        border_color_btn.setFixedSize(50, 30)
+        border_color_btn.setStyleSheet(
+            f"background-color: rgb({self.node['border_color'][0]}, {self.node['border_color'][1]}, {self.node['border_color'][2]})"
+        )
+        border_color_btn.clicked.connect(lambda: self.pickColor("border_color"))
+        border_color_layout.addWidget(border_color_btn)
+        border_node_color_r = QtWidgets.QLineEdit(
+            self, text=f'{self.node["border_color"][0]}'
+        )
+        border_node_color_g = QtWidgets.QLineEdit(
+            self, text=f'{self.node["border_color"][1]}'
+        )
+        border_node_color_b = QtWidgets.QLineEdit(
+            self, text=f'{self.node["border_color"][2]}'
+        )
+        border_color_layout.addWidget(border_node_color_r)
+        border_color_layout.addWidget(border_node_color_g)
+        border_color_layout.addWidget(border_node_color_b)
+        layout.addLayout(border_color_layout)
+
+        self.tab_node.addTab(self.widget_node, "Node")
+
     def createCustomNode(self, inputPorts: list, outputPorts: list, elementDict: list):
         # check if the node name is valid name for a class
         if not self.isidentifier():
@@ -134,44 +253,67 @@ class CreateNodeDialog(QtWidgets.QWidget):
     @QtCore.Slot()
     def addProperties(self):
         # add items in to  self.properties, and update the properties widget
-        
-        self.properties['name'].append(f'property_{len(self.properties["name"])}')
-        self.properties['type'].append('lineEdit')
-        self.properties['value'].append('')
-        
-        itemNum = len(self.properties['name'])
+        self.properties["display_name"].append(
+            f'text_{len(self.properties["display_name"])}'
+        )
+        self.properties["name"].append(f'property_{len(self.properties["name"])}')
+        self.properties["type"].append("lineEdit")
+        self.properties["value"].append("")
+
+        itemNum = len(self.properties["name"])
         self.property_table.setRowCount(itemNum)
         for i in range(itemNum):
-            self.property_table.setItem(i, 0, QtWidgets.QTableWidgetItem(self.properties['name'][i]))
-            
+            self.property_table.setItem(
+                i, 0, QtWidgets.QTableWidgetItem(self.properties["display_name"][i])
+            )
+            self.property_table.setItem(
+                i, 1, QtWidgets.QTableWidgetItem(self.properties["name"][i])
+            )
+
             combo = QtWidgets.QComboBox()
             for t in self.propertyTypes:
                 combo.addItem(t)
-            combo.setCurrentText(self.properties['type'][i])
-            self.property_table.setCellWidget(i, 1, combo)
-            
-            self.property_table.setItem(i, 2, QtWidgets.QTableWidgetItem(self.properties['value'][i]))
+            combo.setCurrentText(self.properties["type"][i])
+            self.property_table.setCellWidget(i, 2, combo)
+
+            self.property_table.setItem(
+                i, 3, QtWidgets.QTableWidgetItem(self.properties["value"][i])
+            )
             # add a button to delete the current item
-            btn = QtWidgets.QPushButton('Delete', clicked= lambda i: self.deleteProperty(i))
-            self.property_table.setCellWidget(i, 3, btn)
-        
-        
-    @QtCore.Slot() 
+            btn = QtWidgets.QPushButton(
+                "Delete", clicked=lambda i: self.deleteProperty(i)
+            )
+            self.property_table.setCellWidget(i, 4, btn)
+
+    @QtCore.Slot()
     def updatePropertiesWidgetType(self):
         # update the properties widget based on the selected type in the dropdown menu
-        pass      
-    
+        pass
+
     @QtCore.Slot()
     def deleteProperty(self, index: int):
         # delete the property at the index
-        self.properties['name'].pop(index)
-        self.properties['type'].pop(index)
-        self.properties['value'].pop(index)
+        self.properties["text"].pop(index)
+        self.properties["name"].pop(index)
+        self.properties["type"].pop(index)
+        self.properties["value"].pop(index)
         self.property_table.removeRow(index)
-        
+
+    @QtCore.Slot()
+    def pickColor(self):
+        # open a color picker dialog, and set the color to the selected color
+        color_picker = QtWidgets.QColorDialog()
+        color = color_picker.getColor()
+        if color.isValid():
+            print(color.name())
+            return color.name()
+        return None
+
+
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     dialog = CreateNodeDialog()
     dialog.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
