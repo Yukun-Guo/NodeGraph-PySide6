@@ -46,7 +46,7 @@ class CreateNodeDialog(QtWidgets.QWidget):
         self.widget_properties = QtWidgets.QWidget(self)
         self.property_table = QtWidgets.QTableWidget(self)
         self.property_table.setColumnCount(4)
-        self.property_table.setHorizontalHeaderLabels(['Name', 'Type', 'Value'])
+        self.property_table.setHorizontalHeaderLabels(['Name', 'Type', 'Value','operation'])
         self.property_table.horizontalHeader().setStretchLastSection(True)
         self.property_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Stretch)
         
@@ -152,7 +152,7 @@ class CreateNodeDialog(QtWidgets.QWidget):
             
             self.property_table.setItem(i, 2, QtWidgets.QTableWidgetItem(self.properties['value'][i]))
             # add a button to delete the current item
-            btn = QtWidgets.QPushButton('Delete', clicked= lambda: self.deleteProperty(i))
+            btn = QtWidgets.QPushButton('Delete', clicked= lambda i: self.deleteProperty(i))
             self.property_table.setCellWidget(i, 3, btn)
         
         
