@@ -45,7 +45,7 @@ class CreateNodeDialog(QtWidgets.QWidget):
 
         self.widget_properties = QtWidgets.QWidget(self)
         self.property_table = QtWidgets.QTableWidget(self)
-        self.property_table.setColumnCount(3)
+        self.property_table.setColumnCount(4)
         self.property_table.setHorizontalHeaderLabels(['Name', 'Type', 'Value'])
         self.property_table.horizontalHeader().setStretchLastSection(True)
         self.property_table.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeMode.Stretch)
@@ -151,13 +151,24 @@ class CreateNodeDialog(QtWidgets.QWidget):
             self.property_table.setCellWidget(i, 1, combo)
             
             self.property_table.setItem(i, 2, QtWidgets.QTableWidgetItem(self.properties['value'][i]))
+            # add a button to delete the current item
+            btn = QtWidgets.QPushButton('Delete', clicked= lambda: self.deleteProperty(i))
+            self.property_table.setCellWidget(i, 3, btn)
         
         
     @QtCore.Slot() 
     def updatePropertiesWidgetType(self):
         # update the properties widget based on the selected type in the dropdown menu
         pass      
-
+    
+    @QtCore.Slot()
+    def deleteProperty(self, index: int):
+        # delete the property at the index
+        self.properties['name'].pop(index)
+        self.properties['type'].pop(index)
+        self.properties['value'].pop(index)
+        self.property_table.removeRow(index)
+        
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
