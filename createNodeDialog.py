@@ -36,7 +36,7 @@ class CreateNodeDialog(QtWidgets.QWidget):
     def _setupUi(self):
         self.setWindowTitle("Create Node")
         self.setWindowFlags(QtCore.Qt.WindowType.WindowStaysOnTopHint)
-        self.resize(600, 600)
+        self.resize(680, 600)
         self.layout = QtWidgets.QVBoxLayout(self)
 
         self.name_wgt = QtWidgets.QLineEdit(self)
@@ -79,26 +79,32 @@ class CreateNodeDialog(QtWidgets.QWidget):
 
         inPorts_layout = QtWidgets.QVBoxLayout()
         inPorts_layout.addWidget(QtWidgets.QLabel("Input Ports"))
-        inPorts_table = QtWidgets.QTableWidget(self)
-        inPorts_table.setColumnCount(3)
-        inPorts_table.setHorizontalHeaderLabels(["Display Name", "Name", ""])
-        inPorts_table.horizontalHeader().setStretchLastSection(True)
-        inPorts_table.horizontalHeader().setSectionResizeMode(
+        self.inPorts_table = QtWidgets.QTableWidget(self)
+        self.inPorts_table.setColumnCount(3)
+        self.inPorts_table.setHorizontalHeaderLabels(["Display name", "Name", ""])
+        self.inPorts_table.horizontalHeader().setStretchLastSection(True)
+        self.inPorts_table.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeMode.Stretch
         )
-        inPorts_layout.addWidget(inPorts_table)
+        inPorts_layout.addWidget(self.inPorts_table)
+        add_inport_btn = QtWidgets.QPushButton("Add", self)
+        add_inport_btn.clicked.connect(lambda: self.addPort("in"))
+        inPorts_layout.addWidget(add_inport_btn)
         layout.addLayout(inPorts_layout)
 
         outPorts_layout = QtWidgets.QVBoxLayout()
         outPorts_layout.addWidget(QtWidgets.QLabel("Output Ports"))
-        outPorts_table = QtWidgets.QTableWidget(self)
-        outPorts_table.setColumnCount(3)
-        outPorts_table.setHorizontalHeaderLabels(["Display Name", "Name", ""])
-        outPorts_table.horizontalHeader().setStretchLastSection(True)
-        outPorts_table.horizontalHeader().setSectionResizeMode(
+        self.outPorts_table = QtWidgets.QTableWidget(self)
+        self.outPorts_table.setColumnCount(3)
+        self.outPorts_table.setHorizontalHeaderLabels(["Display name", "Name", ""])
+        self.outPorts_table.horizontalHeader().setStretchLastSection(True)
+        self.outPorts_table.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeMode.Stretch
         )
-        outPorts_layout.addWidget(outPorts_table)
+        outPorts_layout.addWidget(self.outPorts_table)
+        add_oport_btn = QtWidgets.QPushButton("Add", self)
+        add_oport_btn.clicked.connect(lambda: self.addPort("out"))
+        outPorts_layout.addWidget(add_oport_btn)
         layout.addLayout(outPorts_layout)
 
         self.tab_Ports.addTab(self.widget_Ports, "Ports")
@@ -250,16 +256,15 @@ class CreateNodeDialog(QtWidgets.QWidget):
             },
         )
 
-    @QtCore.Slot()
-    def addProperties(self):
-        # add items in to  self.properties, and update the properties widget
-        self.properties["display_name"].append(
-            f'text_{len(self.properties["display_name"])}'
+    def _updatePrpertyWidget(self):
+        
+        #clear the table items  
+        self.property_table.clear()
+        self.property_table.setRowCount(0)
+        self.property_table.setHorizontalHeaderLabels(
+            ["Display name", "Name", "Type", "Value", " "]
         )
-        self.properties["name"].append(f'property_{len(self.properties["name"])}')
-        self.properties["type"].append("lineEdit")
-        self.properties["value"].append("")
-
+        
         itemNum = len(self.properties["name"])
         self.property_table.setRowCount(itemNum)
         for i in range(itemNum):
@@ -279,26 +284,100 @@ class CreateNodeDialog(QtWidgets.QWidget):
             self.property_table.setItem(
                 i, 3, QtWidgets.QTableWidgetItem(self.properties["value"][i])
             )
-            # add a button to delete the current item
+            # add a button to delete the current item, the clicked signal is connected to the deleteProperty method, and the index is passed as an argument
             btn = QtWidgets.QPushButton(
-                "Delete", clicked=lambda i: self.deleteProperty(i)
+                "Delete", clicked=lambda checked, i=i: self.deleteProperty(i)
             )
             self.property_table.setCellWidget(i, 4, btn)
+    @QtCore.Slot()
+    def addProperties(self):
+        # add items in to  self.properties, and update the properties widget
+        self.properties["display_name"].append(
+            f'text_{len(self.properties["display_name"])}'
+        )
+        self.properties["name"].append(f'property_{len(self.properties["name"])}')
+        self.properties["type"].append("lineEdit")
+        self.properties["value"].append("")
+        self._updatePrpertyWidget()
 
+    @QtCore.Slot()
+    def addPort(self, portType: str):
+        # add a port to the input or output ports
+        if portType == "in":
+            self.inPorts["display_name"].append(
+                f'in_{len(self.inPorts["display_name"])}'
+            )
+            self.inPorts["name"].append(f'inport_{len(self.inPorts["name"])}')
+        else:
+            self.outPorts["display_name"].append(
+                f'out_{len(self.outPorts["display_name"])}'
+            )
+            self.outPorts["name"].append(f'outport_{len(self.outPorts["name"])}')
+
+        self._updatePortWidget(portType)
+
+    
+    def _updatePortWidget(self, portType="in"):
+        if portType == "in":
+            self.inPorts_table.clear()
+            self.inPorts_table.setRowCount(0)
+            self.inPorts_table.setHorizontalHeaderLabels(["Display name", "Name", ""])
+            itemNum = len(self.inPorts["name"])
+            self.inPorts_table.setRowCount(itemNum)
+            for i in range(itemNum):
+                self.inPorts_table.setItem(
+                    i, 0, QtWidgets.QTableWidgetItem(self.inPorts["display_name"][i])
+                )
+                self.inPorts_table.setItem(
+                    i, 1, QtWidgets.QTableWidgetItem(self.inPorts["name"][i])
+                )
+                btn = QtWidgets.QPushButton(
+                    "Delete", clicked=lambda checked, i=i: self.deletePort(i, portType)
+                )
+                self.inPorts_table.setCellWidget(i, 2, btn)
+        else:
+            self.outPorts_table.clear()
+            self.outPorts_table.setRowCount(0)
+            self.outPorts_table.setHorizontalHeaderLabels(["Display name", "Name", ""])
+            itemNum = len(self.outPorts["name"])
+            self.outPorts_table.setRowCount(itemNum)
+            for i in range(itemNum):
+                self.outPorts_table.setItem(
+                    i, 0, QtWidgets.QTableWidgetItem(self.outPorts["display_name"][i])
+                )
+                self.outPorts_table.setItem(
+                    i, 1, QtWidgets.QTableWidgetItem(self.outPorts["name"][i])
+                )
+                btn = QtWidgets.QPushButton(
+                    "Delete", clicked=lambda checked, i=i: self.deletePort(i, portType)
+                )
+                self.outPorts_table.setCellWidget(i, 2, btn)
+    
     @QtCore.Slot()
     def updatePropertiesWidgetType(self):
         # update the properties widget based on the selected type in the dropdown menu
         pass
 
     @QtCore.Slot()
-    def deleteProperty(self, index: int):
+    def deleteProperty(self, index: int):       
         # delete the property at the index
-        self.properties["text"].pop(index)
+        self.properties["display_name"].pop(index)
         self.properties["name"].pop(index)
         self.properties["type"].pop(index)
         self.properties["value"].pop(index)
-        self.property_table.removeRow(index)
+        self._updatePrpertyWidget()
 
+    @QtCore.Slot()
+    def deletePort(self, index: int, portType: str):
+        # delete the port at the index
+        if portType == "in":
+            self.inPorts["display_name"].pop(index)
+            self.inPorts["name"].pop(index)
+        else:
+            self.outPorts["display_name"].pop(index)
+            self.outPorts["name"].pop(index)
+        self._updatePortWidget(portType)
+    
     @QtCore.Slot()
     def pickColor(self):
         # open a color picker dialog, and set the color to the selected color
