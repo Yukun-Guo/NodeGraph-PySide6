@@ -379,15 +379,18 @@ class CreateNodeDialog(QtWidgets.QWidget):
         self._updatePortWidget(portType)
     
     @QtCore.Slot()
-    def pickColor(self):
+    def pickColor(self, colorType: str):
         # open a color picker dialog, and set the color to the selected color
         color_picker = QtWidgets.QColorDialog()
         color = color_picker.getColor()
         if color.isValid():
-            print(color.name())
-            return color.name()
-        return None
-
+            if colorType == "node_color":
+                self.node["color"] = [color.red(), color.green(), color.blue()]
+            elif colorType == "text_color":
+                self.node["text_color"] = [color.red(), color.green(), color.blue()]
+            else:
+                self.node["border_color"] = [color.red(), color.green(), color.blue()]
+        self._updateNodeWidget()
 
 if __name__ == "__main__":
     import sys
