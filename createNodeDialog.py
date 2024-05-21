@@ -65,11 +65,15 @@ class CreateNodeDialog(QtWidgets.QWidget):
         self.property_table.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeMode.Stretch
         )
-        add_btn = QtWidgets.QPushButton("Add", self, clicked=self.addProperties)
+        add_btn = QtWidgets.QPushButton("Add", icon=QtGui.QIcon("icon/add.png"),parent=self, clicked=self.addProperties)
+        add_btn.setFixedWidth(200)
+        
+        
         # add button to widget properties
         layout = QtWidgets.QVBoxLayout(self.widget_properties)
-        layout.addWidget(self.property_table)
         layout.addWidget(add_btn)
+        layout.addWidget(self.property_table)
+        
         layout.addStretch()
         self.tab_properties.addTab(self.widget_properties, "Properties")
 
@@ -87,7 +91,7 @@ class CreateNodeDialog(QtWidgets.QWidget):
             QtWidgets.QHeaderView.ResizeMode.Stretch
         )
         inPorts_layout.addWidget(self.inPorts_table)
-        add_inport_btn = QtWidgets.QPushButton("Add", self)
+        add_inport_btn = QtWidgets.QPushButton("Add", icon=QtGui.QIcon("icon/add.png"),parent=self)
         add_inport_btn.clicked.connect(lambda: self.addPort("in"))
         inPorts_layout.addWidget(add_inport_btn)
         layout.addLayout(inPorts_layout)
@@ -102,7 +106,7 @@ class CreateNodeDialog(QtWidgets.QWidget):
             QtWidgets.QHeaderView.ResizeMode.Stretch
         )
         outPorts_layout.addWidget(self.outPorts_table)
-        add_oport_btn = QtWidgets.QPushButton("Add", self)
+        add_oport_btn = QtWidgets.QPushButton("Add",icon=QtGui.QIcon("icon/add.png"),parent=self)
         add_oport_btn.clicked.connect(lambda: self.addPort("out"))
         outPorts_layout.addWidget(add_oport_btn)
         layout.addLayout(outPorts_layout)
@@ -126,12 +130,21 @@ class CreateNodeDialog(QtWidgets.QWidget):
         )
         color_btn.clicked.connect(lambda: self.pickColor("node_color"))
         color_layout.addWidget(color_btn)
-        node_color_r = QtWidgets.QLineEdit(self, text=f'{self.node["color"][0]}')
-        node_color_g = QtWidgets.QLineEdit(self, text=f'{self.node["color"][1]}')
-        node_color_b = QtWidgets.QLineEdit(self, text=f'{self.node["color"][2]}')
-        color_layout.addWidget(node_color_r)
-        color_layout.addWidget(node_color_g)
-        color_layout.addWidget(node_color_b)
+        self.node_color_r = QtWidgets.QLineEdit(self, text=f'{self.node["color"][0]}')
+        self.node_color_r.setValidator(QtGui.QIntValidator(0, 255))
+        self.node_color_r.textChanged.connect(lambda: {self.node_color_r.setText(str(min(255,self._to_int(self.node_color_r.text())))),
+                                                        color_btn.setStyleSheet(f"background-color: rgb({self.node_color_r.text()}, {self.node_color_g.text()}, {self.node_color_b.text()})")})   
+        self.node_color_g = QtWidgets.QLineEdit(self, text=f'{self.node["color"][1]}')
+        self.node_color_g.setValidator(QtGui.QIntValidator(0, 255))
+        self.node_color_g.textChanged.connect(lambda: {self.node_color_g.setText(str(min(255,self._to_int(self.node_color_g.text())))),
+                                                        color_btn.setStyleSheet(f"background-color: rgb({self.node_color_r.text()}, {self.node_color_g.text()}, {self.node_color_b.text()})")} )
+        self.node_color_b = QtWidgets.QLineEdit(self, text=f'{self.node["color"][2]}')
+        self.node_color_b.setValidator(QtGui.QIntValidator(0, 255))
+        self.node_color_b.textChanged.connect(lambda: {self.node_color_b.setText(str(min(255,self._to_int(self.node_color_b.text())))),
+                                                        color_btn.setStyleSheet(f"background-color: rgb({self.node_color_r.text()}, {self.node_color_g.text()}, {self.node_color_b.text()})")} )
+        color_layout.addWidget(self.node_color_r)
+        color_layout.addWidget(self.node_color_g)
+        color_layout.addWidget(self.node_color_b)
         layout.addLayout(color_layout)
 
         text_color_layout = QtWidgets.QHBoxLayout()
@@ -145,18 +158,28 @@ class CreateNodeDialog(QtWidgets.QWidget):
         )
         text_color_btn.clicked.connect(lambda: self.pickColor("text_color"))
         text_color_layout.addWidget(text_color_btn)
-        text_node_color_r = QtWidgets.QLineEdit(
+        self.text_node_color_r = QtWidgets.QLineEdit(
             self, text=f'{self.node["text_color"][0]}'
         )
-        text_node_color_g = QtWidgets.QLineEdit(
+        self.text_node_color_r.setValidator(QtGui.QIntValidator(0, 255))
+        # connect the textChanged signal to the setText method and change the text_color_btn background color
+        self.text_node_color_r.textChanged.connect(lambda: {self.text_node_color_r.setText(str(min(255,self._to_int(self.text_node_color_r.text())))),
+                                                            text_color_btn.setStyleSheet(f"background-color: rgb({self.text_node_color_r.text()}, {self.text_node_color_g.text()}, {self.text_node_color_b.text()})")})
+        self.text_node_color_g = QtWidgets.QLineEdit(
             self, text=f'{self.node["text_color"][1]}'
         )
-        text_node_color_b = QtWidgets.QLineEdit(
+        self.text_node_color_g.setValidator(QtGui.QIntValidator(0, 255))
+        self.text_node_color_g.textChanged.connect(lambda: {self.text_node_color_g.setText(str(min(255,self._to_int(self.text_node_color_g.text())))),
+                                                            text_color_btn.setStyleSheet(f"background-color: rgb({self.text_node_color_g.text()}, {self.text_node_color_g.text()}, {self.text_node_color_b.text()})")})
+        self.text_node_color_b = QtWidgets.QLineEdit(
             self, text=f'{self.node["text_color"][2]}'
         )
-        text_color_layout.addWidget(text_node_color_r)
-        text_color_layout.addWidget(text_node_color_g)
-        text_color_layout.addWidget(text_node_color_b)
+        self.text_node_color_b.setValidator(QtGui.QIntValidator(0, 255))
+        self.text_node_color_b.textChanged.connect(lambda: {self.text_node_color_g.setText(str(min(255,self._to_int(self.text_node_color_g.text())))),
+                                                            text_color_btn.setStyleSheet(f"background-color: rgb({self.text_node_color_b.text()}, {self.text_node_color_g.text()}, {self.text_node_color_b.text()})")})        
+        text_color_layout.addWidget(self.text_node_color_r)
+        text_color_layout.addWidget(self.text_node_color_g)
+        text_color_layout.addWidget(self.text_node_color_b)
         layout.addLayout(text_color_layout)
 
         border_color_layout = QtWidgets.QHBoxLayout()
@@ -170,22 +193,37 @@ class CreateNodeDialog(QtWidgets.QWidget):
         )
         border_color_btn.clicked.connect(lambda: self.pickColor("border_color"))
         border_color_layout.addWidget(border_color_btn)
-        border_node_color_r = QtWidgets.QLineEdit(
+        self.border_node_color_r = QtWidgets.QLineEdit(
             self, text=f'{self.node["border_color"][0]}'
         )
-        border_node_color_g = QtWidgets.QLineEdit(
+        self.border_node_color_r.setValidator(QtGui.QIntValidator(0, 255))
+        self.border_node_color_r.textChanged.connect(lambda: {self.text_node_color_r.setText(str(min(255,self._to_int(self.text_node_color_r.text())))),
+                                                              border_color_btn.setStyleSheet(f"background-color: rgb({self.border_node_color_r.text()}, {self.border_node_color_g.text()}, {self.border_node_color_b.text()})")} )  
+        self.border_node_color_g = QtWidgets.QLineEdit(
             self, text=f'{self.node["border_color"][1]}'
         )
-        border_node_color_b = QtWidgets.QLineEdit(
+        self.border_node_color_g.setValidator(QtGui.QIntValidator(0, 255))
+        self.border_node_color_g.textChanged.connect(lambda: {self.text_node_color_g.setText(str(min(255,self._to_int(self.text_node_color_g.text())))),
+                                                              border_color_btn.setStyleSheet(f"background-color: rgb({self.border_node_color_g.text()}, {self.border_node_color_g.text()}, {self.border_node_color_b.text()})")} )  
+        self.border_node_color_b = QtWidgets.QLineEdit(
             self, text=f'{self.node["border_color"][2]}'
         )
-        border_color_layout.addWidget(border_node_color_r)
-        border_color_layout.addWidget(border_node_color_g)
-        border_color_layout.addWidget(border_node_color_b)
+        self.border_node_color_b.setValidator(QtGui.QIntValidator(0, 255))
+        self.border_node_color_b.textChanged.connect(lambda: {self.text_node_color_b.setText(str(min(255,self._to_int(self.text_node_color_b.text())))),
+                                                              border_color_btn.setStyleSheet(f"background-color: rgb({self.border_node_color_b.text()}, {self.border_node_color_g.text()}, {self.border_node_color_b.text()})")} )  
+        border_color_layout.addWidget(self.border_node_color_r)
+        border_color_layout.addWidget(self.border_node_color_g)
+        border_color_layout.addWidget(self.border_node_color_b)
         layout.addLayout(border_color_layout)
 
         self.tab_node.addTab(self.widget_node, "Node")
 
+    def _to_int(self, s):
+        try:
+            return int(s)
+        except ValueError:
+            return 0
+    
     def createCustomNode(self, inputPorts: list, outputPorts: list, elementDict: list):
         # check if the node name is valid name for a class
         if not self.isidentifier():
@@ -286,7 +324,7 @@ class CreateNodeDialog(QtWidgets.QWidget):
             )
             # add a button to delete the current item, the clicked signal is connected to the deleteProperty method, and the index is passed as an argument
             btn = QtWidgets.QPushButton(
-                "Delete", clicked=lambda checked, i=i: self.deleteProperty(i)
+                "Delete", icon=QtGui.QIcon("icon/bin.png"),clicked=lambda checked, i=i: self.deleteProperty(i)
             )
             self.property_table.setCellWidget(i, 4, btn)
     @QtCore.Slot()
@@ -332,7 +370,7 @@ class CreateNodeDialog(QtWidgets.QWidget):
                     i, 1, QtWidgets.QTableWidgetItem(self.inPorts["name"][i])
                 )
                 btn = QtWidgets.QPushButton(
-                    "Delete", clicked=lambda checked, i=i: self.deletePort(i, portType)
+                    "Delete",icon=QtGui.QIcon("icon/bin.png"), clicked=lambda checked, i=i: self.deletePort(i, portType)
                 )
                 self.inPorts_table.setCellWidget(i, 2, btn)
         else:
@@ -349,7 +387,7 @@ class CreateNodeDialog(QtWidgets.QWidget):
                     i, 1, QtWidgets.QTableWidgetItem(self.outPorts["name"][i])
                 )
                 btn = QtWidgets.QPushButton(
-                    "Delete", clicked=lambda checked, i=i: self.deletePort(i, portType)
+                    "Delete", icon=QtGui.QIcon("icon/bin.png"),clicked=lambda checked, i=i: self.deletePort(i, portType)
                 )
                 self.outPorts_table.setCellWidget(i, 2, btn)
     
@@ -386,11 +424,21 @@ class CreateNodeDialog(QtWidgets.QWidget):
         if color.isValid():
             if colorType == "node_color":
                 self.node["color"] = [color.red(), color.green(), color.blue()]
+                self.node_color_r.setText(str(color.red()))
+                self.node_color_g.setText(str(color.green()))
+                self.node_color_b.setText(str(color.blue()))
             elif colorType == "text_color":
                 self.node["text_color"] = [color.red(), color.green(), color.blue()]
+                self.text_node_color_r.setText(str(color.red()))
+                self.text_node_color_g.setText(str(color.green()))
+                self.text_node_color_b.setText(str(color.blue()))
             else:
                 self.node["border_color"] = [color.red(), color.green(), color.blue()]
-        self._updateNodeWidget()
+                self.border_node_color_r.setText(str(color.red()))
+                self.border_node_color_g.setText(str(color.green()))
+                self.border_node_color_b.setText(str(color.blue()))
+        
+        
 
 if __name__ == "__main__":
     import sys
