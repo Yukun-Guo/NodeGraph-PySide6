@@ -40,6 +40,8 @@ class CreateNodeDialog(QtWidgets.QWidget):
         self.layout = QtWidgets.QVBoxLayout(self)
 
         self.name_wgt = QtWidgets.QLineEdit(self)
+        self.save_to_presets_btn = QtWidgets.QPushButton("Save to Presets", self, clicked=self.saveToPresets)
+        self.create_btn = QtWidgets.QPushButton("Create", self, clicked=self.createNode)
         self.tab_properties = QtWidgets.QTabWidget(self)
         self.tab_node = QtWidgets.QTabWidget(self)
         self.tab_Ports = QtWidgets.QTabWidget(self)
@@ -47,7 +49,9 @@ class CreateNodeDialog(QtWidgets.QWidget):
         name_layout = QtWidgets.QHBoxLayout()
         name_layout.addWidget(QtWidgets.QLabel("Name:"))
         name_layout.addWidget(self.name_wgt)
-
+        name_layout.addWidget(self.save_to_presets_btn)
+        name_layout.addWidget(self.create_btn)
+        
         self.layout.setSpacing(4)
         self.layout.addLayout(name_layout)
         self.layout.addWidget(self.tab_Ports)
@@ -437,7 +441,16 @@ class CreateNodeDialog(QtWidgets.QWidget):
                 self.border_node_color_r.setText(str(color.red()))
                 self.border_node_color_g.setText(str(color.green()))
                 self.border_node_color_b.setText(str(color.blue()))
-        
+    
+    @QtCore.Slot()
+    def saveToPresets(self):
+        # save the current node to the presets
+        pass
+    
+    @QtCore.Slot()
+    def createNode(self):
+        # create a new node based on the input data
+        pass
         
 
 if __name__ == "__main__":
