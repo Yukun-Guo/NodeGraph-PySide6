@@ -15,16 +15,15 @@ class CreateNodeDialog(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
         super(CreateNodeDialog, self).__init__()
+        self.parent = parent
         self.node_name = ""
         self.inPorts = {
-            "display_name": [],
             "name": [],
         }
         self.outPorts = {
-            "display_name": [],
             "name": [],
         }
-        self.properties = {"display_name": [], "name": [], "type": [], "value": []}
+        self.properties = {"name": [], "type": [], "default_value": [],"items": []}
         self.node = {
             "color": [13, 18, 23],
             "text_color": [255, 255, 255],
@@ -39,7 +38,10 @@ class CreateNodeDialog(QtWidgets.QWidget):
         self.resize(680, 600)
         self.layout = QtWidgets.QVBoxLayout(self)
 
-        self.name_wgt = QtWidgets.QLineEdit(self)
+        self.type_wgt = QtWidgets.QLineEdit(self,text="node.custom")
+        self.type_wgt.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
+        self.name_wgt = QtWidgets.QLineEdit(self,text="newNodeName")
+        
         self.save_to_presets_btn = QtWidgets.QPushButton("Save to Presets", self, clicked=self.saveToPresets)
         self.create_btn = QtWidgets.QPushButton("Create", self, clicked=self.createNode)
         self.tab_properties = QtWidgets.QTabWidget(self)
@@ -47,8 +49,11 @@ class CreateNodeDialog(QtWidgets.QWidget):
         self.tab_Ports = QtWidgets.QTabWidget(self)
 
         name_layout = QtWidgets.QHBoxLayout()
-        name_layout.addWidget(QtWidgets.QLabel("Name:"))
+        name_layout.addWidget(QtWidgets.QLabel("Node ID:"))
+        name_layout.addWidget(self.type_wgt)
+        name_layout.addWidget(QtWidgets.QLabel("."))
         name_layout.addWidget(self.name_wgt)
+        name_layout.addStretch()
         name_layout.addWidget(self.save_to_presets_btn)
         name_layout.addWidget(self.create_btn)
         
@@ -63,7 +68,7 @@ class CreateNodeDialog(QtWidgets.QWidget):
         self.property_table = QtWidgets.QTableWidget(self)
         self.property_table.setColumnCount(5)
         self.property_table.setHorizontalHeaderLabels(
-            ["Display name", "Name", "Type", "Value", " "]
+            ["Name", "Type", "Default Value", "Possiable Values"," "]
         )
         self.property_table.horizontalHeader().setStretchLastSection(True)
         self.property_table.horizontalHeader().setSectionResizeMode(
@@ -88,8 +93,8 @@ class CreateNodeDialog(QtWidgets.QWidget):
         inPorts_layout = QtWidgets.QVBoxLayout()
         inPorts_layout.addWidget(QtWidgets.QLabel("Input Ports"))
         self.inPorts_table = QtWidgets.QTableWidget(self)
-        self.inPorts_table.setColumnCount(3)
-        self.inPorts_table.setHorizontalHeaderLabels(["Display name", "Name", ""])
+        self.inPorts_table.setColumnCount(2)
+        self.inPorts_table.setHorizontalHeaderLabels(["Name", ""])
         self.inPorts_table.horizontalHeader().setStretchLastSection(True)
         self.inPorts_table.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeMode.Stretch
@@ -103,8 +108,8 @@ class CreateNodeDialog(QtWidgets.QWidget):
         outPorts_layout = QtWidgets.QVBoxLayout()
         outPorts_layout.addWidget(QtWidgets.QLabel("Output Ports"))
         self.outPorts_table = QtWidgets.QTableWidget(self)
-        self.outPorts_table.setColumnCount(3)
-        self.outPorts_table.setHorizontalHeaderLabels(["Display name", "Name", ""])
+        self.outPorts_table.setColumnCount(2)
+        self.outPorts_table.setHorizontalHeaderLabels(["Name", ""])
         self.outPorts_table.horizontalHeader().setStretchLastSection(True)
         self.outPorts_table.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeMode.Stretch
@@ -228,103 +233,131 @@ class CreateNodeDialog(QtWidgets.QWidget):
         except ValueError:
             return 0
     
-    def createCustomNode(self, inputPorts: list, outputPorts: list, elementDict: list):
+    def isidentifier(self):
+        return self.node_name.isidentifier()
+    
+    def _createCustomNode(self,nodeType: str,nodeName:str, inputPorts: any, outputPorts: any, elementDict: any, colors: any):
         # check if the node name is valid name for a class
-        if not self.isidentifier():
+        if not nodeName.isidentifier():
             raise ValueError("Invalid node name, must be a valid python class name")
-        code_str = "def __init__(self):\n\tsuper(" + self + ", self).__init__()\n"
-        for inputPort in inputPorts:
-            code_str = (
-                f"{code_str}\tself.add_input(name='{inputPort['name']}',"
-                + f"multi_input={inputPort['multi_input']},"
-                + f"display_name={inputPort['display_name']},"
-                + f"color={inputPort['color']}, "
-                + f"locked={inputPort['locked']},"
-                + f"painter_func={inputPort['painter_func']})\n"
-            )
+        code_str = "def __init__(self):\n\t\tsuper(" + nodeName + ", self).__init__()\n"
+        for inputPort in inputPorts["name"]:
+            code_str = f"{code_str}\t\tself.add_input(name='{inputPort}')\n"
 
-        for outputPort in outputPorts:
-            code_str = (
-                f"{code_str}\tself.add_output(name='{outputPort['name']}',"
-                + f"multi_output={outputPort['multi_output']},"
-                + f"display_name={outputPort['display_name']},"
-                + f"color={outputPort['color']}, "
-                + f"locked={outputPort['locked']},"
-                + f"painter_func={outputPort['painter_func']})\n"
-            )
 
-        for element in elementDict:
-            if element["type"] == "text_input":
+        for outputPort in outputPorts['name']:
+            code_str = f"{code_str}\t\tself.add_output(name='{outputPort}')\n"
+
+        for e in zip(elementDict["name"],elementDict["type"],elementDict["default_value"],elementDict["items"]):
+            if e[1] == "lineEdit":
                 code_str = (
-                    f"{code_str}\tself.add_text_input(name='{element['name']}',"
-                    + f"label='{element['label']}',"
-                    + f"placeholder_text='{element['placeholder_text']}',"
-                    + f"tooltip='{element['tooltip']}',"
-                    + f"tab='{element['tab']}')\n"
+                    f"{code_str}\t\tself.add_text_input(name='{e[0]}',"
+                    + f"label='{e[0]}',"
+                    + f"text='{e[2]}',"
+                    + f"tooltip=None,"
+                    + f"tab=None)\n"
+                )
+            elif e[1] == "comboBox":
+                code_str = (
+                    f"{code_str}\t\tself.add_combo_menu(name='{e[0]}',"
+                    + f"label='{e[0]}',"
+                    + f"items={e[3]},"
+                    + f"tooltip=None,"
+                    + f"tab=None)\n"
+                )
+            elif e[1] == "checkBox":
+                code_str = (
+                    f"{code_str}\t\tself.add_checkbox(name='{e[0]}',"
+                    + f"label='',"
+                    + f"text='{e[0]}',"
+                    + f"state={e[2]},"
+                    + f"tooltip=None,"
+                    + f"tab=None)\n"
                 )
 
-            elif element["type"] == "combo_menu":
-                code_str = (
-                    f"{code_str}\tself.add_combo_menu(name='{element['name']}',"
-                    + f"label='{element['label']}',"
-                    + f"items={element['items']},"
-                    + f"tooltip='{element['tooltip']}',"
-                    + f"tab='{element['tab']}')\n"
-                )
-
-            elif element["type"] == "checkbox":
-                code_str = (
-                    f"{code_str}\tself.add_checkbox(name='{element['name']}',"
-                    + f"label='{element['label']}',"
-                    + f"text='{element['text']}',"
-                    + f"state={element['state']},"
-                    + f"tooltip='{element['tooltip']}',"
-                    + f"tab='{element['tab']}')\n"
-                )
         create_code = compile(
             code_str,
             "<string>",
             "exec",
         )
         func = types.FunctionType(create_code.co_consts[0], globals(), "func")
-
         return type(
-            self,
+            nodeName,
             (BaseNode,),
             {
-                "__identifier__": "nodes.custom.",
-                "NODE_NAME": self,
+                "__identifier__": nodeType,
+                "NODE_NAME": nodeName,
                 "__init__": func,
             },
         )
 
+    def _generateCreateNodeCode(self, nodeType: str, nodeName: str, inputPorts: any, outputPorts: any, elementDict: any, colors: any):
+        code_str = "def __init__(self):\n\t\tsuper(" + nodeName + ", self).__init__()\n"
+        for inputPort in inputPorts["name"]:
+            code_str = f"{code_str}\t\tself.add_input(name='{inputPort}')\n"
+
+        for outputPort in outputPorts['name']:
+            code_str = f"{code_str}\t\tself.add_output(name='{outputPort}')\n"
+
+        for e in zip(elementDict["name"],elementDict["type"],elementDict["default_value"],elementDict["items"]):
+            if e[1] == "lineEdit":
+                code_str = (
+                    f"{code_str}\t\tself.add_text_input(name='{e[0]}',"
+                    + f"label='{e[0]}',"
+                    + f"text='{e[2]}',"
+                    + f"tooltip=None,"
+                    + f"tab=None)\n"
+                )
+            elif e[1] == "comboBox":
+                code_str = (
+                    f"{code_str}\t\tself.add_combo_menu(name='{e[0]}',"
+                    + f"label='{e[0]}',"
+                    + f"items={e[3]},"
+                    + f"tooltip=None,"
+                    + f"tab=None)\n"
+                )
+            elif e[1] == "checkBox":
+                code_str = (
+                    f"{code_str}\t\tself.add_checkbox(name='{e[0]}',"
+                    + f"label='',"
+                    + f"text='{e[0]}',"
+                    + f"state={e[2]},"
+                    + f"tooltip=None,"
+                    + f"tab=None)\n"
+                )
+
+        return f"class {nodeName}(BaseNode):\n\t__identifier__ = '{nodeType}'\n\tNODE_NAME = '{nodeName}'\n\t{code_str}"
+    
     def _updatePrpertyWidget(self):
         
         #clear the table items  
         self.property_table.clear()
         self.property_table.setRowCount(0)
         self.property_table.setHorizontalHeaderLabels(
-            ["Display name", "Name", "Type", "Value", " "]
+            ["Name", "Type", "Default Value", "Possiable Values", " "]
         )
         
         itemNum = len(self.properties["name"])
         self.property_table.setRowCount(itemNum)
         for i in range(itemNum):
+            # self.property_table.setItem(
+            #     i, 0, QtWidgets.QTableWidgetItem(self.properties["display_name"][i])
+            # )
             self.property_table.setItem(
-                i, 0, QtWidgets.QTableWidgetItem(self.properties["display_name"][i])
-            )
-            self.property_table.setItem(
-                i, 1, QtWidgets.QTableWidgetItem(self.properties["name"][i])
+                i, 0, QtWidgets.QTableWidgetItem(self.properties["name"][i])
             )
 
             combo = QtWidgets.QComboBox()
             for t in self.propertyTypes:
                 combo.addItem(t)
             combo.setCurrentText(self.properties["type"][i])
-            self.property_table.setCellWidget(i, 2, combo)
+            self.property_table.setCellWidget(i, 1, combo)
 
             self.property_table.setItem(
-                i, 3, QtWidgets.QTableWidgetItem(self.properties["value"][i])
+                i, 2, QtWidgets.QTableWidgetItem(self.properties["default_value"][i])
+            )
+            self.property_table.setItem(
+                i, 3, QtWidgets.QTableWidgetItem(self.properties["items"][i])
             )
             # add a button to delete the current item, the clicked signal is connected to the deleteProperty method, and the index is passed as an argument
             btn = QtWidgets.QPushButton(
@@ -334,27 +367,28 @@ class CreateNodeDialog(QtWidgets.QWidget):
     @QtCore.Slot()
     def addProperties(self):
         # add items in to  self.properties, and update the properties widget
-        self.properties["display_name"].append(
-            f'text_{len(self.properties["display_name"])}'
-        )
+        # self.properties["display_name"].append(
+        #     f'text_{len(self.properties["display_name"])}'
+        # )
         self.properties["name"].append(f'property_{len(self.properties["name"])}')
         self.properties["type"].append("lineEdit")
-        self.properties["value"].append("")
+        self.properties["default_value"].append("")
+        self.properties["items"].append("")
         self._updatePrpertyWidget()
 
     @QtCore.Slot()
     def addPort(self, portType: str):
         # add a port to the input or output ports
         if portType == "in":
-            self.inPorts["display_name"].append(
-                f'in_{len(self.inPorts["display_name"])}'
-            )
-            self.inPorts["name"].append(f'inport_{len(self.inPorts["name"])}')
+            # self.inPorts["display_name"].append(
+            #     f'in_{len(self.inPorts["display_name"])}'
+            # )
+            self.inPorts["name"].append(f'in_{len(self.inPorts["name"])}')
         else:
-            self.outPorts["display_name"].append(
-                f'out_{len(self.outPorts["display_name"])}'
-            )
-            self.outPorts["name"].append(f'outport_{len(self.outPorts["name"])}')
+            # self.outPorts["display_name"].append(
+            #     f'out_{len(self.outPorts["display_name"])}'
+            # )
+            self.outPorts["name"].append(f'out_{len(self.outPorts["name"])}')
 
         self._updatePortWidget(portType)
 
@@ -363,37 +397,37 @@ class CreateNodeDialog(QtWidgets.QWidget):
         if portType == "in":
             self.inPorts_table.clear()
             self.inPorts_table.setRowCount(0)
-            self.inPorts_table.setHorizontalHeaderLabels(["Display name", "Name", ""])
+            self.inPorts_table.setHorizontalHeaderLabels(["Name", ""])
             itemNum = len(self.inPorts["name"])
             self.inPorts_table.setRowCount(itemNum)
             for i in range(itemNum):
+                # self.inPorts_table.setItem(
+                #     i, 0, QtWidgets.QTableWidgetItem(self.inPorts["display_name"][i])
+                # )
                 self.inPorts_table.setItem(
-                    i, 0, QtWidgets.QTableWidgetItem(self.inPorts["display_name"][i])
-                )
-                self.inPorts_table.setItem(
-                    i, 1, QtWidgets.QTableWidgetItem(self.inPorts["name"][i])
+                    i, 0, QtWidgets.QTableWidgetItem(self.inPorts["name"][i])
                 )
                 btn = QtWidgets.QPushButton(
                     "Delete",icon=QtGui.QIcon("icon/bin.png"), clicked=lambda checked, i=i: self.deletePort(i, portType)
                 )
-                self.inPorts_table.setCellWidget(i, 2, btn)
+                self.inPorts_table.setCellWidget(i, 1, btn)
         else:
             self.outPorts_table.clear()
             self.outPorts_table.setRowCount(0)
-            self.outPorts_table.setHorizontalHeaderLabels(["Display name", "Name", ""])
+            self.outPorts_table.setHorizontalHeaderLabels(["Name", ""])
             itemNum = len(self.outPorts["name"])
             self.outPorts_table.setRowCount(itemNum)
             for i in range(itemNum):
+                # self.outPorts_table.setItem(
+                #     i, 0, QtWidgets.QTableWidgetItem(self.outPorts["display_name"][i])
+                # )
                 self.outPorts_table.setItem(
-                    i, 0, QtWidgets.QTableWidgetItem(self.outPorts["display_name"][i])
-                )
-                self.outPorts_table.setItem(
-                    i, 1, QtWidgets.QTableWidgetItem(self.outPorts["name"][i])
+                    i, 0, QtWidgets.QTableWidgetItem(self.outPorts["name"][i])
                 )
                 btn = QtWidgets.QPushButton(
                     "Delete", icon=QtGui.QIcon("icon/bin.png"),clicked=lambda checked, i=i: self.deletePort(i, portType)
                 )
-                self.outPorts_table.setCellWidget(i, 2, btn)
+                self.outPorts_table.setCellWidget(i, 1, btn)
     
     @QtCore.Slot()
     def updatePropertiesWidgetType(self):
@@ -403,20 +437,22 @@ class CreateNodeDialog(QtWidgets.QWidget):
     @QtCore.Slot()
     def deleteProperty(self, index: int):       
         # delete the property at the index
-        self.properties["display_name"].pop(index)
+        # self.properties["display_name"].pop(index)
         self.properties["name"].pop(index)
         self.properties["type"].pop(index)
-        self.properties["value"].pop(index)
+        self.properties["default_value"].pop(index)
+        self.properties["items"].pop(index)
+        
         self._updatePrpertyWidget()
 
     @QtCore.Slot()
     def deletePort(self, index: int, portType: str):
         # delete the port at the index
         if portType == "in":
-            self.inPorts["display_name"].pop(index)
+            # self.inPorts["display_name"].pop(index)
             self.inPorts["name"].pop(index)
         else:
-            self.outPorts["display_name"].pop(index)
+            # self.outPorts["display_name"].pop(index)
             self.outPorts["name"].pop(index)
         self._updatePortWidget(portType)
     
@@ -449,8 +485,11 @@ class CreateNodeDialog(QtWidgets.QWidget):
     
     @QtCore.Slot()
     def createNode(self):
-        # create a new node based on the input data
-        pass
+        nodeClass = self._createCustomNode(self.type_wgt.text(), self.name_wgt.text(), self.inPorts, self.outPorts, self.properties, self.node)
+        self.parent.register_node(nodeClass)
+
+        # create node with custom text color and disable it.
+        self.parent.create_node(f"{self.type_wgt.text()}.{self.name_wgt.text()}",name=self.name_wgt.text())
         
 
 if __name__ == "__main__":

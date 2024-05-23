@@ -16,6 +16,7 @@ from NodeGraphQt import (
 # import example nodes from the "example_nodes" package
 from examples.nodes import basic_nodes, custom_ports_node, group_node, widget_nodes
 import PresetNotes
+from  createNodeDialog import CreateNodeDialog
 import inspect
 
 
@@ -285,15 +286,8 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
 
     @QtCore.Slot()
     def onCreateNode(self):
-        QtWidgets.QInputDialog.getText(
-            self,
-            "Create Node",
-            "Enter the name of the node you want to create",
-            QtWidgets.QLineEdit.Normal,
-            "",
-        )
-        # create a dialog to let user to create a new node.
-
+        createNode = CreateNodeDialog(self.graph)
+        createNode.show()
     @QtCore.Slot(str)
     def onFilterChanged(self, text: str):
         # filter the node explorer tree items based on the text.
