@@ -3,10 +3,6 @@ import inspect
 import types
 from NodeGraphQt import (
     BaseNode,
-    NodeGraph,
-    PropertiesBinWidget,
-    NodesTreeWidget,
-    NodesPaletteWidget,
 )
 
 
@@ -35,8 +31,9 @@ class CreateNodeDialog(QtWidgets.QWidget):
     def _setupUi(self):
         self.setWindowTitle("Create Node")
         self.setWindowFlags(QtCore.Qt.WindowType.WindowStaysOnTopHint)
-        self.resize(680, 600)
+        self.resize(600, 400)
         self.layout = QtWidgets.QVBoxLayout(self)
+        self.layout.setSpacing(0)
 
         self.type_wgt = QtWidgets.QLineEdit(self, text="node.custom")
         self.type_wgt.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
@@ -48,6 +45,7 @@ class CreateNodeDialog(QtWidgets.QWidget):
         self.create_btn = QtWidgets.QPushButton("Create", self, clicked=self.createNode)
         self.tab_properties = QtWidgets.QTabWidget(self)
         self.tab_node = QtWidgets.QTabWidget(self)
+        self.tab_node.setVisible(False)
         self.tab_Ports = QtWidgets.QTabWidget(self)
 
         name_layout = QtWidgets.QHBoxLayout()
@@ -137,6 +135,7 @@ class CreateNodeDialog(QtWidgets.QWidget):
         layout = QtWidgets.QVBoxLayout(
             self.widget_node, spacing=3, contentsMargins=QtCore.QMargins(0, 3, 3, 0)
         )
+        self.widget_node.setVisible(False)
 
         color_layout = QtWidgets.QHBoxLayout()
         color_label = QtWidgets.QLabel("Color:")
@@ -330,7 +329,7 @@ class CreateNodeDialog(QtWidgets.QWidget):
         # check if the node name is valid name for a class
         if not nodeName.isidentifier():
             raise ValueError("Invalid node name, must be a valid python class name")
-        code_str = "def __init__(self):\n\t\tsuper(" + nodeName + ", self).__init__()\n"
+        code_str = "def __init__(self):\n\t\tsuper(type(self), self).__init__()\n"
         for inputPort in inputPorts["name"]:
             code_str = f"{code_str}\t\tself.add_input(name='{inputPort}')\n"
 
@@ -375,7 +374,7 @@ class CreateNodeDialog(QtWidgets.QWidget):
             "exec",
         )
         func = types.FunctionType(create_code.co_consts[0], globals(), "func")
-        return type(
+        newNodeClass = type(
             nodeName,
             (BaseNode,),
             {
@@ -384,6 +383,7 @@ class CreateNodeDialog(QtWidgets.QWidget):
                 "__init__": func,
             },
         )
+        return newNodeClass
 
     def _generateCreateNodeCode(
         self,
@@ -593,8 +593,15 @@ class CreateNodeDialog(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def saveToPresets(self):
-        # save the current node to the presets
-        pass
+        nodeCode = self._generateCreateNodeCode(
+            self.type_wgt.text(),
+            self.name_wgt.text(),
+            self.inPorts,
+            self.outPorts,
+            self.properties,
+            self.node,
+        )
+        print(nodeCode)
 
     @QtCore.Slot()
     def createNode(self):
@@ -606,10 +613,20 @@ class CreateNodeDialog(QtWidgets.QWidget):
             self.properties,
             self.node,
         )
-        self.parent.register_node(nodeClass)
-
+        nodeID = f"{self.type_wgt.text()}.{self.name_wgt.text()}"
+        # check if the node is already registered
+        if nodeID in self.parent.graph.registered_nodes():
+            # show a message box that the node is already registered
+            QtWidgets.QMessageBox.warning(
+                self,
+                "Node Already Registered",
+                f"The node {nodeID} is already registered",
+            )
+            return
+        # register the node
+        self.parent.graph.register_node(nodeClass)
         # create node with custom text color and disable it.
-        self.parent.create_node(
+        self.parent.graph.create_node(
             f"{self.type_wgt.text()}.{self.name_wgt.text()}", name=self.name_wgt.text()
         )
 

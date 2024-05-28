@@ -14,86 +14,9 @@ from NodeGraphQt import (
 )
 
 # import example nodes from the "example_nodes" package
-from examples.nodes import basic_nodes, custom_ports_node, group_node, widget_nodes
 import PresetNotes
 from createNodeDialog import CreateNodeDialog
 import inspect
-
-
-def createCustomNode(
-    nodeName: str,
-    inputPorts: list,  # {'name': str,'multi_input':bool,'display_name':bool,'color':None,'locked':bool,'painter_func':None}=None,
-    outputPorts: list,  # {'name': str,'multi_input':bool,'display_name':bool,'color':None,'locked':bool,'painter_func':None}=None,
-    elementDict: list,  # {'type':str,'name': str, 'label': str, 'text': str, 'placeholder_text': str, 'tooltip':Any|None,'tab':Any|None}=None,
-):
-    # check if the node name is valid name for a class
-    if not nodeName.isidentifier():
-        raise ValueError("Invalid node name, must be a valid python class name")
-    code_str = "def __init__(self):\n\tsuper(" + nodeName + ", self).__init__()\n"
-    for inputPort in inputPorts:
-        code_str = (
-            f"{code_str}\tself.add_input(name='{inputPort['name']}',"
-            + f"multi_input={inputPort['multi_input']},"
-            + f"display_name={inputPort['display_name']},"
-            + f"color={inputPort['color']}, "
-            + f"locked={inputPort['locked']},"
-            + f"painter_func={inputPort['painter_func']})\n"
-        )
-
-    for outputPort in outputPorts:
-        code_str = (
-            f"{code_str}\tself.add_output(name='{outputPort['name']}',"
-            + f"multi_output={outputPort['multi_output']},"
-            + f"display_name={outputPort['display_name']},"
-            + f"color={outputPort['color']}, "
-            + f"locked={outputPort['locked']},"
-            + f"painter_func={outputPort['painter_func']})\n"
-        )
-
-    for element in elementDict:
-        if element["type"] == "text_input":
-            code_str = (
-                f"{code_str}\tself.add_text_input(name='{element['name']}',"
-                + f"label='{element['label']}',"
-                + f"placeholder_text='{element['placeholder_text']}',"
-                + f"tooltip='{element['tooltip']}',"
-                + f"tab='{element['tab']}')\n"
-            )
-
-        elif element["type"] == "combo_menu":
-            code_str = (
-                f"{code_str}\tself.add_combo_menu(name='{element['name']}',"
-                + f"label='{element['label']}',"
-                + f"items={element['items']},"
-                + f"tooltip='{element['tooltip']}',"
-                + f"tab='{element['tab']}')\n"
-            )
-
-        elif element["type"] == "checkbox":
-            code_str = (
-                f"{code_str}\tself.add_checkbox(name='{element['name']}',"
-                + f"label='{element['label']}',"
-                + f"text='{element['text']}',"
-                + f"state={element['state']},"
-                + f"tooltip='{element['tooltip']}',"
-                + f"tab='{element['tab']}')\n"
-            )
-    create_code = compile(
-        code_str,
-        "<string>",
-        "exec",
-    )
-    func = types.FunctionType(create_code.co_consts[0], globals(), "func")
-
-    return type(
-        nodeName,
-        (BaseNode,),
-        {
-            "__identifier__": "nodes.custom.",
-            "NODE_NAME": nodeName,
-            "__init__": func,
-        },
-    )
 
 
 class FlowNodeGraph(QtWidgets.QMainWindow):
@@ -290,7 +213,7 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
 
     @QtCore.Slot()
     def onCreateNode(self):
-        createNode = CreateNodeDialog(self.graph)
+        createNode = CreateNodeDialog(self)
         createNode.show()
 
     @QtCore.Slot(str)
