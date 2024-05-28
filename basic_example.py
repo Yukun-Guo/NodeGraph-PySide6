@@ -16,7 +16,7 @@ from NodeGraphQt import (
 # import example nodes from the "example_nodes" package
 from examples.nodes import basic_nodes, custom_ports_node, group_node, widget_nodes
 import PresetNotes
-from  createNodeDialog import CreateNodeDialog
+from createNodeDialog import CreateNodeDialog
 import inspect
 
 
@@ -104,7 +104,7 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         super(FlowNodeGraph, self).__init__()
         self.setAcceptDrops(True)
         self.initUI()
-        self.properties_bin = PropertiesBinWidget(node_graph=self.graph,mode='dock')
+        self.properties_bin = PropertiesBinWidget(node_graph=self.graph, mode="dock")
         self.properties_bin.setWindowFlags(QtCore.Qt.WindowType.Tool)
         self.dockWidgetProperties.setWidget(self.properties_bin)
         self.setupInitalGraphy()
@@ -156,12 +156,16 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
         )
         self.nodefilter = QtWidgets.QLineEdit(textChanged=self.onFilterChanged)
         self.nodefilter.setPlaceholderText("Filter nodes...")
-        refreshButton = QtWidgets.QPushButton(text="", icon=QtGui.QIcon("icon/refresh.png"))
+        refreshButton = QtWidgets.QPushButton(
+            text="", icon=QtGui.QIcon("icon/refresh.png")
+        )
 
         refreshButton.clicked.connect(self.updateNodeExplorer)
         filterAndRefreshWidget = QtWidgets.QWidget()
         filterAndRefreshLayout = QtWidgets.QHBoxLayout(
-            filterAndRefreshWidget, spacing=0, contentsMargins=QtCore.QMargins(0, 0, 0, 0),
+            filterAndRefreshWidget,
+            spacing=0,
+            contentsMargins=QtCore.QMargins(0, 0, 0, 0),
         )
         filterAndRefreshLayout.addWidget(self.nodefilter)
         filterAndRefreshLayout.addWidget(refreshButton)
@@ -288,6 +292,7 @@ class FlowNodeGraph(QtWidgets.QMainWindow):
     def onCreateNode(self):
         createNode = CreateNodeDialog(self.graph)
         createNode.show()
+
     @QtCore.Slot(str)
     def onFilterChanged(self, text: str):
         # filter the node explorer tree items based on the text.
