@@ -1,10 +1,9 @@
 from PySide6 import QtWidgets, QtCore, QtGui
-import inspect
+
 import types
 from NodeGraphQt import (
     BaseNode,
 )
-
 
 class CreateNodeDialog(QtWidgets.QWidget):
     """a dialog for creating a new node."""
