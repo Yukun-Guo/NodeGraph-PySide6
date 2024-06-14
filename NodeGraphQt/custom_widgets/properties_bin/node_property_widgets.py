@@ -181,7 +181,9 @@ class _PortConnectionsContainer(QtWidgets.QWidget):
 
         layout = QtWidgets.QVBoxLayout(self)
         layout.addWidget(self.input_group)
+        layout.addWidget(self.input_tree)
         layout.addWidget(self.output_group)
+        layout.addWidget(self.output_tree)
         layout.addStretch()
 
         self.input_group.setChecked(False)
