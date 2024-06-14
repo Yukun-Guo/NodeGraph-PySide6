@@ -659,13 +659,14 @@ class PropertiesBinWidget(QtWidgets.QWidget):
         btn_clr.clicked.connect(self.clear_bin)
 
         top_layout = QtWidgets.QHBoxLayout()
+
         top_layout.setSpacing(2)
         top_layout.addWidget(self._limit)
         top_layout.addStretch(1)
         top_layout.addWidget(self._btn_lock)
         top_layout.addWidget(btn_clr)
 
-        layout = QtWidgets.QVBoxLayout(self)
+        layout = QtWidgets.QVBoxLayout(self, spacing=0, contentsMargins=QtCore.QMargins(0, 0, 0, 0))
         layout.addLayout(top_layout)
         layout.addWidget(self._prop_list, 1)
 
