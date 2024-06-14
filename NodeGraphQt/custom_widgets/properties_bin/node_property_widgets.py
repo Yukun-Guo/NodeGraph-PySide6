@@ -245,6 +245,7 @@ class _PortConnectionsContainer(QtWidgets.QWidget):
         # TODO: will need to update this checkbox lock logic to work with
         #       the undo/redo functionality.
         lock_chb = QtWidgets.QCheckBox()
+        lock_chb.setStyleSheet('background-color: transparent;')
         lock_chb.setChecked(port.locked())
         lock_chb.clicked.connect(lambda x: port.set_locked(x))
         tree.setItemWidget(item, 0, lock_chb)
@@ -257,6 +258,7 @@ class _PortConnectionsContainer(QtWidgets.QWidget):
         tree.setItemWidget(item, 2, combo)
 
         focus_btn = QtWidgets.QPushButton()
+        focus_btn.setStyleSheet('background-color: transparent;border: none;')
         focus_btn.setIcon(QtGui.QIcon(
             tree.style().standardPixmap(QtWidgets.QStyle.StandardPixmap.SP_DialogYesButton)
         ))
