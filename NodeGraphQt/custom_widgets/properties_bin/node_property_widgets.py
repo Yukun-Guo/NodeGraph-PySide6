@@ -220,6 +220,7 @@ class _PortConnectionsContainer(QtWidgets.QWidget):
         tree_widget.setHeaderLabels(headers)
         tree_widget.setHeaderHidden(False)
         tree_widget.header().setStretchLastSection(False)
+        tree_widget.header().setStyleSheet('QHeaderView::section{background-color: rgba(125,125,125,35);}')
         QtWidgets.QHeaderView.setSectionResizeMode(
             tree_widget.header(), 2, QtWidgets.QHeaderView.ResizeMode.Stretch
         )
