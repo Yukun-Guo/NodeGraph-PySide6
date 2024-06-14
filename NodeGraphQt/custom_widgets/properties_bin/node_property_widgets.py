@@ -332,6 +332,7 @@ class NodePropEditorWidget(QtWidgets.QWidget):
         close_btn.clicked.connect(self._on_close)
 
         self.name_wgt = PropLineEdit()
+        self.name_wgt.setStyleSheet('border: 1px solid rgba(192,192,192,160);')
         self.name_wgt.set_name('name')
         self.name_wgt.setToolTip('Name\nSet the node name.')
         self.name_wgt.set_value(node.name())
