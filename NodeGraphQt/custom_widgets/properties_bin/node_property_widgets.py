@@ -343,6 +343,7 @@ class NodePropEditorWidget(QtWidgets.QWidget):
         self.name_wgt.value_changed.connect(self._on_property_changed)
 
         self.type_wgt = QtWidgets.QLabel(node.type_)
+        self.type_wgt.setStyleSheet('background-color: transparent;')
         self.type_wgt.setAlignment(QtCore.Qt.AlignmentFlag.AlignRight)
         self.type_wgt.setToolTip(
             'type_\nNode type identifier followed by the class name.'
