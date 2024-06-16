@@ -183,6 +183,7 @@ class _PortConnectionsContainer(QtWidgets.QWidget):
 
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(1, 1, 1, 1)
+        layout.setSpacing(1)
         layout.addWidget(self.input_group)
         layout.addWidget(self.input_tree)
         layout.addWidget(self.output_group)
