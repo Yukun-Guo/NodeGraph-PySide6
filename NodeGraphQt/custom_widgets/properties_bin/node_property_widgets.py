@@ -83,10 +83,12 @@ class _PropertiesContainer(QtWidgets.QWidget):
         super(_PropertiesContainer, self).__init__(parent)
         self.__layout = QtWidgets.QGridLayout()
         self.__layout.setColumnStretch(1, 1)
-        self.__layout.setSpacing(6)
+        self.__layout.setSpacing(1)
 
         layout = QtWidgets.QVBoxLayout(self)
-        layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
+        layout.setContentsMargins(1, 1, 1, 1)
+        layout.setSpacing(1)
+        layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter)
         layout.addLayout(self.__layout)
 
         self.__property_widgets = {}
@@ -122,7 +124,7 @@ class _PropertiesContainer(QtWidgets.QWidget):
 
         label_flags = QtCore.Qt.AlignmentFlag.AlignCenter | QtCore.Qt.AlignmentFlag.AlignRight
         if widget.__class__.__name__ == 'PropTextEdit':
-            label_flags = label_flags | QtCore.Qt.AlignmentFlag.AlignTop
+            label_flags = label_flags | QtCore.Qt.AlignmentFlag.AlignHCenter
 
         self.__layout.addWidget(label_widget, row, 0, label_flags)
         self.__layout.addWidget(widget, row, 1)
@@ -180,6 +182,7 @@ class _PortConnectionsContainer(QtWidgets.QWidget):
             self.output_tree.resizeColumnToContents(col)
 
         layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(1, 1, 1, 1)
         layout.addWidget(self.input_group)
         layout.addWidget(self.input_tree)
         layout.addWidget(self.output_group)
