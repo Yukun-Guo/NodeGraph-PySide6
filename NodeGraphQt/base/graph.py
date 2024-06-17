@@ -136,13 +136,14 @@ class NodeGraph(QtCore.QObject):
     :emits: triggered context menu, node object.
     """
 
-    def __init__(self, parent=None, **kwargs):
+    def __init__(self, parent=None,root_path=None, **kwargs):
         """
         Args:
             parent (object): object parent.
             **kwargs (dict): Used for overriding internal objects at init time.
         """
         super(NodeGraph, self).__init__(parent)
+        self.root_path=root_path
         self.setObjectName('NodeGraph')
         self._model = (
             kwargs.get('model') or NodeGraphModel())
@@ -784,9 +785,6 @@ class NodeGraph(QtCore.QObject):
 
         import sys
         import importlib.util
-        root_path = QtCore.QFileInfo.path(
-            QtCore.QFileInfo(QtCore.QCoreApplication.arguments()[0])
-        )
         nodes_menu = self.get_context_menu('nodes')
         def build_menu_command(menu, data):
             """
@@ -797,11 +795,15 @@ class NodeGraph(QtCore.QObject):
                     menu object.
                 data (dict): serialized menu command data.
             """
+            print(self.root_path)
             # if the first character is a dot then it's a relative path.
-            if data['file'].startswith('.'):
+            if data['file'].startswith('./'):
                 # remove the first dot and join the path.
-                data['file'] = os.path.join(root_path, data['file'][1:])
-            full_path = os.path.abspath(data['file'])
+                full_path = self.root_path+data['file'][1:]
+                # full_path = os.path.join(self.root_path, data['file'][1:])
+            else:
+                full_path = os.path.abspath(data['file'])
+            
             base_dir, file_name = os.path.split(full_path)
             base_name = os.path.basename(base_dir)
             file_name, _ = file_name.split('.')
