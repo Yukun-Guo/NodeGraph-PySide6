@@ -795,12 +795,13 @@ class NodeGraph(QtCore.QObject):
                     menu object.
                 data (dict): serialized menu command data.
             """
-            print(self.root_path)
             # if the first character is a dot then it's a relative path.
             if data['file'].startswith('./'):
                 # remove the first dot and join the path.
-                full_path = self.root_path+data['file'][1:]
-                # full_path = os.path.join(self.root_path, data['file'][1:])
+                if self.root_path:
+                    full_path = self.root_path+data['file'][1:]
+                else:
+                    full_path = os.path.abspath(data['file'])
             else:
                 full_path = os.path.abspath(data['file'])
             
