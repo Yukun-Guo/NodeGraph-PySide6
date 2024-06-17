@@ -784,9 +784,10 @@ class NodeGraph(QtCore.QObject):
 
         import sys
         import importlib.util
-
+        root_path = QtCore.QFileInfo.path(
+            QtCore.QFileInfo(QtCore.QCoreApplication.arguments()[0])
+        )
         nodes_menu = self.get_context_menu('nodes')
-
         def build_menu_command(menu, data):
             """
             Create menu command from serialized data.
@@ -796,6 +797,10 @@ class NodeGraph(QtCore.QObject):
                     menu object.
                 data (dict): serialized menu command data.
             """
+            # if the first character is a dot then it's a relative path.
+            if data['file'].startswith('.'):
+                # remove the first dot and join the path.
+                data['file'] = os.path.join(root_path, data['file'][1:])
             full_path = os.path.abspath(data['file'])
             base_dir, file_name = os.path.split(full_path)
             base_name = os.path.basename(base_dir)
